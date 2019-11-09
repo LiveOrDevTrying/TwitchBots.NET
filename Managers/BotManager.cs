@@ -7,6 +7,7 @@ using Twitch.NET.Events;
 using Twitch.NET.Events.Args.ColorChange;
 using Twitch.NET.Events.Args.Connection;
 using Twitch.NET.Events.Args.Error;
+using Twitch.NET.Events.Args.Follows;
 using Twitch.NET.Events.Args.Message;
 using Twitch.NET.Models;
 using Twitch.NET.Models.DTOs.Interfaces;
@@ -14,7 +15,7 @@ using Twitch.NET.Models.Interfaces;
 
 namespace Twitch.NET.Managers
 {
-    public sealed class TwitchNETBotManager : IDisposable
+    public sealed class BotManager : IDisposable
     {
         private readonly ITwitchNETDALService _twitchNETService;
 
@@ -27,23 +28,25 @@ namespace Twitch.NET.Managers
         public event TwitchNETEventHandler<MessageServerCommandEventArgs> MessageServerCommandEvent;
         public event TwitchNETEventHandler<MessageServerChatEventArgs> MessageServerChatEvent;
         public event TwitchNETEventHandler<MessageWhisperEventArgs> MessageWhisperEvent;
+        public event TwitchNETEventHandler<FollowEventArgs> FollowEvent;
         public event TwitchNETEventHandler<ServerChatColorChangeEventArgs> ColorChangeEvent;
         public event TwitchNETEventHandler<ErrorEventArgs> ErrorEvent;
 
-        public TwitchNETBotManager(ITwitchNETDALService twitchNETService)
+        public BotManager(ITwitchNETDALService twitchNETService)
         {
             _twitchNETService = twitchNETService;
         }
 
         public IBot AddBot(BotCredentials credentials, IBotDTO botDTO, int reconnectIntervalMS)
         {
-            var bot = new Bot(_twitchNETService, botDTO, reconnectIntervalMS);
+            IBot bot = new Bot(_twitchNETService, botDTO, reconnectIntervalMS);
             bot.ConnectionBotEvent += OnConnectionBotEvent;
             bot.ConnectionServerBotEvent += OnConnectionServerBotEvent;
             bot.ConnectionServerUserEvent += OnConnectionServerUserEvent;
             bot.MessageServerChatEvent += OnMessageServerChatEvent;
             bot.MessageServerCommandEvent += OnMessageServerCommandEvent;
             bot.MessageWhisperEvent += OnMessageWhisperEvent;
+            bot.FollowEvent += OnFollowEvent;
             bot.ColorChangeEvent += OnColorChangeEvent;
             bot.ErrorEvent += OnErrorEvent;
             bot.Connect(credentials);
@@ -64,6 +67,7 @@ namespace Twitch.NET.Managers
                 bot.MessageServerChatEvent -= OnMessageServerChatEvent;
                 bot.MessageServerCommandEvent -= OnMessageServerCommandEvent;
                 bot.MessageWhisperEvent -= OnMessageWhisperEvent;
+                bot.FollowEvent -= OnFollowEvent;
                 bot.ColorChangeEvent -= OnColorChangeEvent;
                 bot.ErrorEvent -= OnErrorEvent;
                 return true;
@@ -102,6 +106,11 @@ namespace Twitch.NET.Managers
             FireConnectionBotEvent(sender, args);
             return Task.CompletedTask;
         }
+
+        private Task OnFollowEvent(object sender, FollowEventArgs args)
+        {
+            throw new NotImplementedException();
+        }
         private Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {
             FireColorChangeEvent(sender, args);
@@ -136,6 +145,10 @@ namespace Twitch.NET.Managers
         private void FireMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
         {
             MessageWhisperEvent?.Invoke(sender, args);
+        }
+        private void FireFollowEvent(object sender, FollowEventArgs args)
+        {
+            FollowEvent?.Invoke(sender, args);
         }
         private void FireColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {

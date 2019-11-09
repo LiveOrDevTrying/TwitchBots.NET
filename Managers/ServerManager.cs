@@ -8,6 +8,7 @@ using Twitch.NET.Events;
 using Twitch.NET.Events.Args.ColorChange;
 using Twitch.NET.Events.Args.Connection;
 using Twitch.NET.Events.Args.Error;
+using Twitch.NET.Events.Args.Follows;
 using Twitch.NET.Events.Args.Message;
 using Twitch.NET.Models;
 using Twitch.NET.Models.DTOs;
@@ -32,6 +33,7 @@ namespace Twitch.NET.Managers
         public event TwitchNETEventHandler<ConnectionServerUserEventArgs> ConnectionServerUserEvent;
         public event TwitchNETEventHandler<MessageServerCommandEventArgs> MessageServerCommandEvent;
         public event TwitchNETEventHandler<MessageServerChatEventArgs> MessageServerChatEvent;
+        public event TwitchNETEventHandler<FollowEventArgs> FollowEvent;
         public event TwitchNETEventHandler<ServerChatColorChangeEventArgs> ColorChangeEvent;
         public event TwitchNETEventHandler<ErrorEventArgs> ErrorEvent;
 
@@ -66,6 +68,7 @@ namespace Twitch.NET.Managers
                 instance.ConnectionServerUserEvent += OnConnectionServerUserEvent;
                 instance.MessageServerChatEvent += OnMessageServerChat;
                 instance.MessageServerCommandEvent += OnMessageServerCommand;
+                instance.FollowEvent += OnFollowEvent;
                 instance.ColorChangeEvent += OnColorChangeEvent;
                 instance.ErrorEvent += OnErrorEvent;
                 _servers.Enqueue(instance);
@@ -97,6 +100,7 @@ namespace Twitch.NET.Managers
                     item.ConnectionServerUserEvent -= OnConnectionServerUserEvent;
                     item.MessageServerChatEvent -= OnMessageServerChat;
                     item.MessageServerCommandEvent -= OnMessageServerCommand;
+                    instance.FollowEvent -= OnFollowEvent;
                     item.ColorChangeEvent -= OnColorChangeEvent;
                     item.ErrorEvent -= OnErrorEvent;
                     item.Dispose();
@@ -169,6 +173,11 @@ namespace Twitch.NET.Managers
             FireConnectionBotEvent(sender, args);
             return Task.CompletedTask;
         }
+        private Task OnFollowEvent(object sender, FollowEventArgs args)
+        {
+            FireFollowEvent(sender, args);
+            return Task.CompletedTask;
+        }
         private Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {
             FireServerChatColorChangeEvent(sender, args);
@@ -199,6 +208,10 @@ namespace Twitch.NET.Managers
         private void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
         {
             MessageServerCommandEvent?.Invoke(sender, args);
+        }
+        private void FireFollowEvent(object sender, FollowEventArgs args)
+        {
+            FollowEvent?.Invoke(sender, args);
         }
         private void FireServerChatColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {

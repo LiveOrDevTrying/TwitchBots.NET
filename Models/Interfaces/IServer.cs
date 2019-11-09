@@ -28,6 +28,7 @@ namespace Twitch.NET.Models.Interfaces
         void SendCommandImmediate(string command);
         void SendMessage(IMessageServerChat message);
         void SendMessageImmediate(string message);
+        void FollowReceived(IUserDTO[] users);
 
         IServerDTO ServerDTO { get; }
         IBot Bot { get; }

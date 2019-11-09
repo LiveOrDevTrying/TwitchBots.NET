@@ -9,6 +9,7 @@ using Twitch.NET.Events;
 using Twitch.NET.Events.Args.ColorChange;
 using Twitch.NET.Events.Args.Connection;
 using Twitch.NET.Events.Args.Error;
+using Twitch.NET.Events.Args.Follows;
 using Twitch.NET.Events.Args.Message;
 using Twitch.NET.Models.DTOs;
 using Twitch.NET.Models.DTOs.Interfaces;
@@ -39,6 +40,7 @@ namespace Twitch.NET.Models
         public event TwitchNETEventHandler<ConnectionServerUserEventArgs> ConnectionServerUserEvent;
         public event TwitchNETEventHandler<MessageServerCommandEventArgs> MessageServerCommandEvent;
         public event TwitchNETEventHandler<MessageServerChatEventArgs> MessageServerChatEvent;
+        public event TwitchNETEventHandler<FollowEventArgs> FollowEvent;
         public event TwitchNETEventHandler<ServerChatColorChangeEventArgs> ColorChangeEvent;
         public event TwitchNETEventHandler<ErrorEventArgs> ErrorEvent;
 
@@ -154,6 +156,14 @@ namespace Twitch.NET.Models
                     Bot = _bot
                 });
             }
+        }
+        public virtual void FollowReceived(IUserDTO[] users)
+        {
+            FireFollowEvent(this, new FollowEventArgs
+            {
+                Server = this,
+                NewFollows = users
+            });
         }
 
         public virtual void OnTimerTick()
@@ -528,6 +538,10 @@ namespace Twitch.NET.Models
         protected virtual void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
         {
             MessageServerCommandEvent?.Invoke(sender, args);
+        }
+        protected virtual void FireFollowEvent(object sender, FollowEventArgs args)
+        {
+            FollowEvent?.Invoke(sender, args);
         }
         protected virtual void FireServerChatColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {

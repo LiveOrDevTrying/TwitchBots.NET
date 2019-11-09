@@ -11,6 +11,7 @@ using Twitch.NET.Events;
 using Twitch.NET.Events.Args.ColorChange;
 using Twitch.NET.Events.Args.Connection;
 using Twitch.NET.Events.Args.Error;
+using Twitch.NET.Events.Args.Follows;
 using Twitch.NET.Events.Args.Message;
 using Twitch.NET.Managers;
 using Twitch.NET.Models.DTOs;
@@ -39,7 +40,6 @@ namespace Twitch.NET.Models
         protected int _intervalReconnectMS;
         protected bool _isRunning = true;
         protected Timer _timer;
-        protected FollowerService _followerService;
         protected TwitchAPI _twitchAPI;
         protected bool _wasServerMessage;
 
@@ -52,6 +52,7 @@ namespace Twitch.NET.Models
         public event TwitchNETEventHandler<MessageServerCommandEventArgs> MessageServerCommandEvent;
         public event TwitchNETEventHandler<MessageServerChatEventArgs> MessageServerChatEvent;
         public event TwitchNETEventHandler<MessageWhisperEventArgs> MessageWhisperEvent;
+        public event TwitchNETEventHandler<FollowEventArgs> FollowEvent;
         public event TwitchNETEventHandler<ServerChatColorChangeEventArgs> ColorChangeEvent;
         public event TwitchNETEventHandler<ErrorEventArgs> ErrorEvent;
 
@@ -95,8 +96,10 @@ namespace Twitch.NET.Models
                 _serverManager.ConnectionServerUserEvent += OnConnectionServerUserEvent;
                 _serverManager.MessageServerChatEvent += OnMessageServerChatEvent;
                 _serverManager.MessageServerCommandEvent += OnMessageServerCommandEvent;
+                _serverManager.FollowEvent += OnFollowFromServerEvent;
                 _serverManager.ColorChangeEvent += OnColorChangeEvent;
                 _serverManager.ErrorEvent += OnErrorEvent;
+
 
                 _client.Connect();
             }
@@ -130,6 +133,7 @@ namespace Twitch.NET.Models
                     _serverManager.ConnectionServerUserEvent -= OnConnectionServerUserEvent;
                     _serverManager.MessageServerChatEvent -= OnMessageServerChatEvent;
                     _serverManager.MessageServerCommandEvent -= OnMessageServerCommandEvent;
+                    _serverManager.FollowEvent -= OnFollowFromServerEvent;
                     _serverManager.ColorChangeEvent -= OnColorChangeEvent;
                     _serverManager.ErrorEvent -= OnErrorEvent;
                     _serverManager = null;
@@ -537,7 +541,39 @@ namespace Twitch.NET.Models
 
         protected virtual void OnNewFollowerDetected(object sender, OnNewFollowersDetectedArgs args)
         {
-            throw new NotImplementedException();
+            var server = _serverManager.Servers.FirstOrDefault(s => s.ServerDTO.Username.Trim().ToLower() == args.Channel.Trim().ToLower());
+
+            if (server != null)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        var users = new List<IUserDTO>();
+
+                        foreach (var follow in args.NewFollowers)
+                        {
+                            var user = await _twitchNetService.GetUserByTwitchIdAsync(follow.FromUserId);
+                            users.Add(user);
+                        }
+
+                        server.FollowReceived(users.ToArray());
+                    }
+                    catch (Exception ex)
+                    {
+                        FireErrorEvent(sender, new ErrorFollowEventArgs
+                        {
+                            Exception = ex,
+                            UserIdsFollowed = args.NewFollowers.Select(s => s.FromUserId).ToArray(),
+                        });
+                    }
+                });
+            }
+        }
+        protected virtual Task OnFollowFromServerEvent(object sender, FollowEventArgs args)
+        {
+            FireFollowEvent(sender, args);
+            return Task.CompletedTask;
         }
 
         protected virtual void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)
@@ -563,6 +599,10 @@ namespace Twitch.NET.Models
         protected virtual void FireMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
         {
             MessageWhisperEvent?.Invoke(sender, args);
+        }
+        protected virtual void FireFollowEvent(object sender, FollowEventArgs args)
+        {
+            FollowEvent?.Invoke(sender, args);
         }
         protected virtual void FireColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {
