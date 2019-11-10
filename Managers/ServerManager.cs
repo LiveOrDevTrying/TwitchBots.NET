@@ -13,6 +13,7 @@ using Twitch.NET.Events.Args.Message;
 using Twitch.NET.Models;
 using Twitch.NET.Models.DTOs;
 using Twitch.NET.Models.Interfaces;
+using TwitchLib.Api.Interfaces;
 using TwitchLib.Client;
 
 namespace Twitch.NET.Managers
@@ -21,6 +22,7 @@ namespace Twitch.NET.Managers
     {
         private readonly ITwitchNETDALService _twitchNetService;
         private readonly TwitchClient _client;
+        private readonly ITwitchAPI _twitchAPI;
         private readonly IBot _bot;
         
         private ConcurrentQueue<IServer> _servers =
@@ -39,12 +41,14 @@ namespace Twitch.NET.Managers
 
         public ServerManager(ITwitchNETDALService twitchNETService,
             TwitchClient client,
+            ITwitchAPI twitchAPI,
             IBot bot,
             int maxNumberMessagesInQueue)
         {
             _twitchNetService = twitchNETService;
             _client = client;
             _bot = bot;
+            _twitchAPI = twitchAPI;
             _maxNumberMessagesInQueue = maxNumberMessagesInQueue;
         }
 
@@ -62,7 +66,7 @@ namespace Twitch.NET.Managers
 
             if (!_servers.Any(s => s.ServerDTO.Username.Trim().ToLower() == serverName.Trim().ToLower()))
             {
-                var instance = new Server(_twitchNetService, _client, _bot, server, _maxNumberMessagesInQueue);
+                var instance = new Server(_twitchNetService, _client, _bot, server, _twitchAPI, _maxNumberMessagesInQueue);
                 instance.ConnectionBotEvent += OnConnectionBotEvent;
                 instance.ConnectionServerBotEvent += OnConnectionServerBotEvent;
                 instance.ConnectionServerUserEvent += OnConnectionServerUserEvent;
@@ -100,7 +104,7 @@ namespace Twitch.NET.Managers
                     item.ConnectionServerUserEvent -= OnConnectionServerUserEvent;
                     item.MessageServerChatEvent -= OnMessageServerChat;
                     item.MessageServerCommandEvent -= OnMessageServerCommand;
-                    instance.FollowEvent -= OnFollowEvent;
+                    item.FollowEvent -= OnFollowEvent;
                     item.ColorChangeEvent -= OnColorChangeEvent;
                     item.ErrorEvent -= OnErrorEvent;
                     item.Dispose();

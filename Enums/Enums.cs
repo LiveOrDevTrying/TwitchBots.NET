@@ -3,9 +3,13 @@
     public enum ConnectionEventType
     {
         ConnectedToTwitch,
+        DisconnectedFromTwitch
+    }
+
+    public enum ConnectionServerEventType
+    {
         ConnectedToServer,
-        DisconnectFromServer,
-        DisconnectFromTwitch
+        DisconnectedFromServer
     }
 
     public enum MessageType

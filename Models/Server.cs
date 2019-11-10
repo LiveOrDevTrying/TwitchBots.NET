@@ -15,6 +15,9 @@ using Twitch.NET.Models.DTOs;
 using Twitch.NET.Models.DTOs.Interfaces;
 using Twitch.NET.Models.Interfaces;
 using Twitch.NET.Utils;
+using TwitchLib.Api.Interfaces;
+using TwitchLib.Api.Services;
+using TwitchLib.Api.Services.Events.FollowerService;
 using TwitchLib.Client;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
@@ -28,9 +31,11 @@ namespace Twitch.NET.Models
         protected readonly TwitchClient _client;
         protected readonly IServerDTO _serverDTO;
         protected readonly IBot _bot;
+        protected readonly ITwitchAPI _twitchAPI;
 
         protected ConcurrentQueue<IMessageServer> _messagesQueued =
             new ConcurrentQueue<IMessageServer>();
+        protected FollowerService _followerService;
         protected bool _isWaitingForColorChange;
         protected int _maxMessagesInQueue;
         protected ChatColorPresets _botChatColor;
@@ -48,11 +53,13 @@ namespace Twitch.NET.Models
             TwitchClient client,
             IBot bot,
             IServerDTO serverDTO,
+            ITwitchAPI twitchAPI,
             int maxMessagesInQueue)
         {
             _twitchNetService = twitchNETService;
             _serverDTO = serverDTO;
             _bot = bot;
+            _twitchAPI = twitchAPI;
             _maxMessagesInQueue = maxMessagesInQueue;
 
             _client = client;
@@ -95,7 +102,7 @@ namespace Twitch.NET.Models
                         MessageText = message,
                         MessageType = MessageType.Sent,
                         Server = this,
-                        User = _bot.BotDTO.User,
+                        User = _bot.BotDTO.UserDTO,
                         Id = Guid.NewGuid(),
                         Timestamp = DateTime.UtcNow
                     }
@@ -138,7 +145,7 @@ namespace Twitch.NET.Models
                         MessageText = command,
                         MessageType = MessageType.Sent,
                         Server = this,
-                        User = _bot.BotDTO.User,
+                        User = _bot.BotDTO.UserDTO,
                         Id = Guid.NewGuid(),
                         Timestamp = DateTime.UtcNow
                     }
@@ -156,14 +163,6 @@ namespace Twitch.NET.Models
                     Bot = _bot
                 });
             }
-        }
-        public virtual void FollowReceived(IUserDTO[] users)
-        {
-            FireFollowEvent(this, new FollowEventArgs
-            {
-                Server = this,
-                NewFollows = users
-            });
         }
 
         public virtual void OnTimerTick()
@@ -263,22 +262,15 @@ namespace Twitch.NET.Models
                 }
             }
         }
-
-        protected virtual void OnChatColorChanged(object sender, OnChatColorChangedArgs args)
+        public virtual void FollowReceived(IUserDTO[] users)
         {
-            if (args.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower())
+            FireFollowEvent(this, new FollowEventArgs
             {
-                _isWaitingForColorChange = false;
-
-                FireServerChatColorChangeEvent(sender, new ServerChatColorChangeEventArgs
-                {
-                    Bot = _bot,
-                    HexColorCode = TwitchNETUtils.GetHexCode(_botChatColor),
-                    Server = this,
-                    ServerChatColorChangeEventType = ServerChatColorChangeEventType.Confirmed
-                });
-            }
+                NewFollows = users,
+                Server = this,
+            });
         }
+
         protected virtual void OnMessageReceived(object sender, OnMessageReceivedArgs args)
         {
             if (args.ChatMessage.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower())
@@ -380,10 +372,13 @@ namespace Twitch.NET.Models
                     FireConnectionServerBotEvent(sender, new ConnectionServerBotEventArgs
                     {
                         Server = this,
-                        ConnectionEventType = Enums.ConnectionEventType.ConnectedToServer,
+                        ConnectionEventType = ConnectionEventType.ConnectedToTwitch,
+                        ConnectionServerEventType = ConnectionServerEventType.ConnectedToServer,
                         Bot = _bot,
                     });
                 }
+
+                StartFollowerService();
             }
             catch (Exception ex)
             {
@@ -392,7 +387,7 @@ namespace Twitch.NET.Models
                     Bot = _bot,
                     ErrorBotServerConnectEventType = ErrorBotServerConnectEventType.JoinChannel,
                     Exception = ex,
-                    Server = this
+                    Server = this,
                 });
             }
         }
@@ -404,7 +399,8 @@ namespace Twitch.NET.Models
                 {
                     FireConnectionServerBotEvent(sender, new ConnectionServerBotEventArgs
                     {
-                        ConnectionEventType = Enums.ConnectionEventType.DisconnectFromServer,
+                        ConnectionServerEventType = ConnectionServerEventType.DisconnectedFromServer,
+                        ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
                         Server = this,
                         Bot = _bot
                     });
@@ -460,7 +456,8 @@ namespace Twitch.NET.Models
 
                         FireConnectionServerUserEvent(sender, new ConnectionServerUserEventArgs
                         {
-                            ConnectionEventType = Enums.ConnectionEventType.ConnectedToServer,
+                            ConnectionServerEventType = ConnectionServerEventType.ConnectedToServer,
+                            ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
                             Server = this,
                             User = user,
                         });
@@ -499,7 +496,8 @@ namespace Twitch.NET.Models
 
                             FireConnectionServerUserEvent(sender, new ConnectionServerUserEventArgs
                             {
-                                ConnectionEventType = Enums.ConnectionEventType.DisconnectFromServer,
+                                ConnectionServerEventType = ConnectionServerEventType.DisconnectedFromServer,
+                                ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
                                 Server = this,
                                 User = user,
                             });
@@ -517,6 +515,80 @@ namespace Twitch.NET.Models
                     }
                 });
             }
+        }
+        protected virtual void OnChatColorChanged(object sender, OnChatColorChangedArgs args)
+        {
+            if (args.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower())
+            {
+                _isWaitingForColorChange = false;
+
+                FireServerChatColorChangeEvent(sender, new ServerChatColorChangeEventArgs
+                {
+                    Bot = _bot,
+                    HexColorCode = TwitchNETUtils.GetHexCode(_botChatColor),
+                    Server = this,
+                    ServerChatColorChangeEventType = ServerChatColorChangeEventType.Confirmed
+                });
+            }
+        }
+
+        protected virtual void StartFollowerService()
+        {
+            StopFollowerService();
+
+            _followerService = new FollowerService(_twitchAPI);
+            _followerService.OnNewFollowersDetected += OnNewFollowerDetected;
+
+        }
+        protected virtual void StopFollowerService()
+        {
+            if (_followerService != null)
+            {
+                try
+                {
+                    _followerService.OnNewFollowersDetected -= OnNewFollowerDetected;
+                    _followerService.Stop();
+                    _followerService = null;
+                }
+                catch
+                { }
+            }
+        }
+
+        protected virtual void OnNewFollowerDetected(object sender, OnNewFollowersDetectedArgs args)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var users = new List<IUserDTO>();
+
+                    foreach (var follow in args.NewFollowers)
+                    {
+                        var user = await _twitchNetService.GetUserByTwitchIdAsync(follow.FromUserId);
+                        users.Add(user);
+                    }
+
+                    FireFollowEvent(this, new FollowEventArgs
+                    {
+                        Server = this,
+                        NewFollows = users.ToArray()
+                    });
+                }
+                catch (Exception ex)
+                {
+                    FireErrorEvent(sender, new ErrorFollowEventArgs
+                    {
+                        Exception = ex,
+                        UserIdsFollowed = args.NewFollowers.Select(s => s.FromUserId).ToArray(),
+                    });
+                }
+            });
+        }
+        protected virtual Task OnFollowFromServerEvent(object sender, FollowEventArgs args)
+        {
+            FireFollowEvent(sender, args);
+            return Task.CompletedTask;
         }
 
         protected virtual void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)

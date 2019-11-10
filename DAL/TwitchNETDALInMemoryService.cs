@@ -27,7 +27,7 @@ namespace Twitch.NET.DAL
         {
             var bot = _objects.Values
                 .OfType<IBotDTO>()
-                .FirstOrDefault(s => s.User.Id == user.Id);
+                .FirstOrDefault(s => s.UserDTO.Id == user.Id);
 
             return bot != null ? Task.FromResult(bot) : Task.FromResult<IBotDTO>(null);
         }
@@ -35,7 +35,7 @@ namespace Twitch.NET.DAL
         {
             var bot = _objects.Values
                 .OfType<IBotDTO>()
-                .FirstOrDefault(s => s.User.Username.Trim().ToLower() == username.Trim().ToLower());
+                .FirstOrDefault(s => s.UserDTO.Username.Trim().ToLower() == username.Trim().ToLower());
 
             return bot != null ? Task.FromResult(bot) : Task.FromResult<IBotDTO>(null);
         }
@@ -44,7 +44,7 @@ namespace Twitch.NET.DAL
             IBotDTO instance = new BotDTO
             {
                 Id = Guid.NewGuid(),
-                User = bot.User
+                UserDTO = bot.UserDTO
             };
 
             return _objects.TryAdd(instance.Id, instance) ? Task.FromResult(instance) : Task.FromResult<IBotDTO>(null);
@@ -54,7 +54,7 @@ namespace Twitch.NET.DAL
             if (_objects.TryGetValue(bot.Id, out var instance) &&
                 instance is IBotDTO c)
             {
-                c.User = bot.User;
+                c.UserDTO = bot.UserDTO;
                 return Task.FromResult(c);
             }
 

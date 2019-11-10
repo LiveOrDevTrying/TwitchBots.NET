@@ -4,6 +4,7 @@ using Twitch.NET.Events;
 using Twitch.NET.Events.Args.ColorChange;
 using Twitch.NET.Events.Args.Connection;
 using Twitch.NET.Events.Args.Error;
+using Twitch.NET.Events.Args.Follows;
 using Twitch.NET.Events.Args.Message;
 using Twitch.NET.Models.DTOs.Interfaces;
 using TwitchLib.Client.Enums;
@@ -19,6 +20,7 @@ namespace Twitch.NET.Models.Interfaces
         event TwitchNETEventHandler<ConnectionServerUserEventArgs> ConnectionServerUserEvent;
         event TwitchNETEventHandler<MessageServerChatEventArgs> MessageServerChatEvent;
         event TwitchNETEventHandler<MessageServerCommandEventArgs> MessageServerCommandEvent;
+        event TwitchNETEventHandler<FollowEventArgs> FollowEvent;
         event TwitchNETEventHandler<ServerChatColorChangeEventArgs> ColorChangeEvent;
         event TwitchNETEventHandler<ErrorEventArgs> ErrorEvent;
 

@@ -67,15 +67,38 @@ namespace Twitch.NET
             {
                 bot = await _twitchNETService.CreateBotAsync(new BotDTO
                 {
-                    User = user
+                    UserDTO = user
                 });
             }
 
-            return _twitchNETBotManager.AddBot(credentials, bot, reconnectIntervalSec * 1000);
+            var instance = _twitchNETBotManager.AddBot(credentials, bot, reconnectIntervalSec * 1000);
+            instance.ConnectionBotEvent += OnConnectionBotEvent;
+            instance.ConnectionServerBotEvent += OnConnectionServerBotEvent;
+            instance.ConnectionServerUserEvent += OnConnectionServerUserEvent;
+            instance.MessageServerChatEvent += OnMessageServerChatEvent;
+            instance.MessageServerCommandEvent += OnMessageServerCommandEvent;
+            instance.MessageWhisperEvent += OnMessageWhisperEvent;
+            instance.FollowEvent += OnFollowEvent;
+            instance.ErrorEvent += OnErrorEvent;
+
+            return instance;
         }
         public virtual async Task<bool> DisconnectBotAsync(IBot bot)
         {
             await Task.FromResult<object>(null);
+
+            if (bot != null &&
+                _twitchNETBotManager.RemoveBot(bot))
+            {
+                bot.ConnectionBotEvent -= OnConnectionBotEvent;
+                bot.ConnectionServerBotEvent -= OnConnectionServerBotEvent;
+                bot.ConnectionServerUserEvent -= OnConnectionServerUserEvent;
+                bot.MessageServerChatEvent -= OnMessageServerChatEvent;
+                bot.MessageServerCommandEvent -= OnMessageServerCommandEvent;
+                bot.MessageWhisperEvent -= OnMessageWhisperEvent;
+                bot.FollowEvent -= OnFollowEvent;
+                bot.ErrorEvent -= OnErrorEvent;
+            }
             return _twitchNETBotManager.RemoveBot(bot);
         }
 
@@ -181,7 +204,7 @@ namespace Twitch.NET
                 {
                     return await _twitchNETService.CreateBotAsync(new BotDTO
                     {
-                        User = user
+                        UserDTO = user
                     });
                 }
             }
@@ -197,24 +220,9 @@ namespace Twitch.NET
             return null;
         }
 
-        protected virtual Task OnMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        protected virtual Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
         {
-            FireMessageWhisperEvent(sender, args);
-            return Task.CompletedTask;
-        }
-        protected virtual Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
-        {
-            FireMessageServerCommandEvent(sender, args);
-            return Task.CompletedTask;
-        }
-        protected virtual Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
-        {
-            FireMessageServerChatEvent(sender, args);
-            return Task.CompletedTask;
-        }
-        protected virtual Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
-        {
-            FireConnectionServerUserEvent(sender, args);
+            FireConnectionBotEvent(sender, args);
             return Task.CompletedTask;
         }
         protected virtual Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
@@ -222,9 +230,24 @@ namespace Twitch.NET
             FireConnectionServerBotEvent(sender, args);
             return Task.CompletedTask;
         }
-        protected virtual Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        protected virtual Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
         {
-            FireConnectionBotEvent(sender, args);
+            FireMessageServerChatEvent(sender, args);
+            return Task.CompletedTask;
+        }
+        protected virtual Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        {
+            FireMessageServerCommandEvent(sender, args);
+            return Task.CompletedTask;
+        }
+        protected virtual Task OnMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        {
+            FireMessageWhisperEvent(sender, args);
+            return Task.CompletedTask;
+        }
+        protected virtual Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        {
+            FireConnectionServerUserEvent(sender, args);
             return Task.CompletedTask;
         }
         protected virtual Task OnFollowEvent(object sender, FollowEventArgs args)
