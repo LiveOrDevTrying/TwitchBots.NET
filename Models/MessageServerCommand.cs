@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Twitch.NET.Enums;
 using Twitch.NET.Models.DTOs.Interfaces;
 using Twitch.NET.Models.Interfaces;
-using TwitchLib.Client.Enums;
-using TwitchLib.Client.Models.Extensions.NetCore;
 
 namespace Twitch.NET.Models
 {

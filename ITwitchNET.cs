@@ -33,9 +33,7 @@ namespace Twitch.NET
         Task<bool> DisconnectBotAsync(IBot bot);
 
         Task<IBotDTO> GetBotAsync(Guid id);
-        Task<IBotDTO> CreateBotAsync(Guid userId);
         Task<IUserDTO> GetUserAsync(Guid id);
-        Task<IUserDTO> CreateUserAsync(IUserDTO user);
 
         void SendCommandToServer(IBot bot, IServer server, string message, ChatColorPresets chatColor);
         void SendCommandToServer(IBot bot, IServer server, string message, string hexCodeColor);

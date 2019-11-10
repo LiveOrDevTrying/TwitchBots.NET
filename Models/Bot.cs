@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +18,6 @@ using Twitch.NET.Models.DTOs.Interfaces;
 using Twitch.NET.Models.Interfaces;
 using Twitch.NET.Utils;
 using TwitchLib.Api;
-using TwitchLib.Api.Services;
-using TwitchLib.Api.Services.Events.FollowerService;
 using TwitchLib.Client;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;

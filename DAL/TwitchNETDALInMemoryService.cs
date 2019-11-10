@@ -23,47 +23,6 @@ namespace Twitch.NET.DAL
                 ? Task.FromResult(c)
                 : Task.FromResult<IBotDTO>(null);
         }
-        public Task<IBotDTO> GetBotAsync(IUserDTO user)
-        {
-            var bot = _objects.Values
-                .OfType<IBotDTO>()
-                .FirstOrDefault(s => s.UserDTO.Id == user.Id);
-
-            return bot != null ? Task.FromResult(bot) : Task.FromResult<IBotDTO>(null);
-        }
-        public Task<IBotDTO> GetBotAsync(string username)
-        {
-            var bot = _objects.Values
-                .OfType<IBotDTO>()
-                .FirstOrDefault(s => s.UserDTO.Username.Trim().ToLower() == username.Trim().ToLower());
-
-            return bot != null ? Task.FromResult(bot) : Task.FromResult<IBotDTO>(null);
-        }
-        public Task<IBotDTO> CreateBotAsync(IBotDTO bot)
-        {
-            IBotDTO instance = new BotDTO
-            {
-                Id = Guid.NewGuid(),
-                UserDTO = bot.UserDTO
-            };
-
-            return _objects.TryAdd(instance.Id, instance) ? Task.FromResult(instance) : Task.FromResult<IBotDTO>(null);
-        }
-        public Task<IBotDTO> UpdateBotAsync(IBotDTO bot)
-        {
-            if (_objects.TryGetValue(bot.Id, out var instance) &&
-                instance is IBotDTO c)
-            {
-                c.UserDTO = bot.UserDTO;
-                return Task.FromResult(c);
-            }
-
-            return Task.FromResult<IBotDTO>(null);
-        }
-        public Task<bool> DeleteBotAsync(IBotDTO bot)
-        {
-            return Task.FromResult(_objects.TryRemove(bot.Id, out var result));
-        }
 
         public Task<IServerDTO> GetServerAsync(Guid id)
         {
@@ -84,31 +43,6 @@ namespace Twitch.NET.DAL
             }
 
             return Task.FromResult<IServerDTO>(null);
-        }
-        public Task<IServerDTO> CreateServerAsync(IServerDTO server)
-        {
-            IServerDTO instance = new ServerDTO
-            {
-                Id = Guid.NewGuid(),
-                Username = server.Username
-            };
-
-            return _objects.TryAdd(instance.Id, instance) ? Task.FromResult(instance) : Task.FromResult<IServerDTO>(null);
-        }
-        public Task<IServerDTO> UpdateServerAsync(IServerDTO server)
-        {
-            if (_objects.TryGetValue(server.Id, out var instance) &&
-                instance is IServerDTO c)
-            {
-                c.Username = server.Username;
-                return Task.FromResult(c);
-            }
-
-            return Task.FromResult<IServerDTO>(null);
-        }
-        public Task<bool> DeleteServerAsync(IServerDTO server)
-        {
-            return Task.FromResult(_objects.TryRemove(server.Id, out var result));
         }
 
         public Task<IUserDTO> GetUserAsync(Guid id)
@@ -158,10 +92,6 @@ namespace Twitch.NET.DAL
             }
 
             return Task.FromResult<IUserDTO>(null);
-        }
-        public Task<bool> DeleteUserAsync(IUserDTO user)
-        {
-            return Task.FromResult(_objects.TryRemove(user.Id, out var result));
         }
 
         public Task<IUserDTO[]> GetUsersOnlineAsync(IServer server)

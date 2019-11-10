@@ -56,14 +56,6 @@ namespace Twitch.NET.Managers
         { 
             var server = await _twitchNetService.GetServerByUsernameAsync(serverName);
 
-            if (server == null)
-            {
-                server = await _twitchNetService.CreateServerAsync(new ServerDTO
-                {
-                    Username = serverName,
-                });
-            };
-
             if (!_servers.Any(s => s.ServerDTO.Username.Trim().ToLower() == serverName.Trim().ToLower()))
             {
                 var instance = new Server(_twitchNetService, _client, _bot, server, _twitchAPI, _maxNumberMessagesInQueue);

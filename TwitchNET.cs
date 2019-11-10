@@ -50,25 +50,11 @@ namespace Twitch.NET
 
         public virtual async Task<IBot> ConnectBotAsync(BotCredentials credentials, int reconnectIntervalSec)
         {
-            var user = await _twitchNETService.GetUserByTwitchUsernameAsync(credentials.Username);
-
-            if (user == null)
-            {
-                user = await _twitchNETService.CreateUserAsync(new UserDTO
-                {
-                    DisplayName = credentials.Username,
-                    Username = credentials.Username,
-                });
-            }
-
-            var bot = await _twitchNETService.GetBotAsync(user);
+            var bot = await _twitchNETService.GetBotAsync(credentials.BotId);
 
             if (bot == null)
             {
-                bot = await _twitchNETService.CreateBotAsync(new BotDTO
-                {
-                    UserDTO = user
-                });
+                return null;
             }
 
             var instance = _twitchNETBotManager.AddBot(credentials, bot, reconnectIntervalSec * 1000);
@@ -157,25 +143,6 @@ namespace Twitch.NET
 
             return null;
         }
-        public virtual async Task<IUserDTO> CreateUserAsync(IUserDTO user)
-        {
-            try
-            {
-                return await _twitchNETService.CreateUserAsync(user);
-            }
-            catch (Exception ex)
-            {
-                FireErrorEvent(this, new ErrorDataUserEventArgs
-                {
-                    Exception = ex,
-                    UserId = user.Id,
-                    User = user,
-                    ErrorDataEventType = ErrorDataEventType.Create,
-                });
-            }
-
-            return null;
-        }
         public virtual async Task<IBotDTO> GetBotAsync(Guid id)
         {
             try
@@ -192,31 +159,6 @@ namespace Twitch.NET
                 });
             }
 
-            return null;
-        }
-        public virtual async Task<IBotDTO> CreateBotAsync(Guid userId)
-        {
-            try
-            {
-                var user = await GetUserAsync(userId);
-
-                if (user != null)
-                {
-                    return await _twitchNETService.CreateBotAsync(new BotDTO
-                    {
-                        UserDTO = user
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                FireErrorEvent(this, new ErrorDataBotEventArgs
-                {
-                    ErrorDataEventType = ErrorDataEventType.Create,
-                    Exception = ex,
-                    UserId = userId
-                });
-            }
             return null;
         }
 
