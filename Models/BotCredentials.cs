@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Twitch.NET.Models
+namespace TwitchBots.NET.Models
 {
     public struct BotCredentials
     {

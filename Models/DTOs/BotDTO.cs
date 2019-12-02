@@ -1,6 +1,6 @@
-﻿using Twitch.NET.Models.DTOs.Interfaces;
+﻿using TwitchBots.NET.Models.DTOs.Interfaces;
 
-namespace Twitch.NET.Models.DTOs
+namespace TwitchBots.NET.Models.DTOs
 {
     public class BotDTO : BaseDTO, IBotDTO
     {

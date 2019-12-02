@@ -1,6 +1,6 @@
-﻿using Twitch.NET.Models.DTOs.Interfaces;
+﻿using TwitchBots.NET.Models.DTOs.Interfaces;
 
-namespace Twitch.NET.Events.Args.Connection
+namespace TwitchBots.NET.Events.Args.Connection
 {
     public class ConnectionServerUserEventArgs  : ConnectionServerEventArgs
     {

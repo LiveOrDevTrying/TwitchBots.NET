@@ -2,18 +2,18 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
-using Twitch.NET.DAL;
-using Twitch.NET.Events;
-using Twitch.NET.Events.Args.ColorChange;
-using Twitch.NET.Events.Args.Connection;
-using Twitch.NET.Events.Args.Error;
-using Twitch.NET.Events.Args.Follows;
-using Twitch.NET.Events.Args.Message;
-using Twitch.NET.Models;
-using Twitch.NET.Models.DTOs.Interfaces;
-using Twitch.NET.Models.Interfaces;
+using TwitchBots.NET.DAL;
+using TwitchBots.NET.Events;
+using TwitchBots.NET.Events.Args.ColorChange;
+using TwitchBots.NET.Events.Args.Connection;
+using TwitchBots.NET.Events.Args.Error;
+using TwitchBots.NET.Events.Args.Follows;
+using TwitchBots.NET.Events.Args.Message;
+using TwitchBots.NET.Models;
+using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.Managers
+namespace TwitchBots.NET.Managers
 {
     public sealed class BotManager : IDisposable
     {

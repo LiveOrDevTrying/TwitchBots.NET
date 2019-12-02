@@ -1,4 +1,4 @@
-﻿namespace Twitch.NET.Models.Interfaces
+﻿namespace TwitchBots.NET.Models.Interfaces
 {
     public interface IMessageWhisper : IMessage
     {

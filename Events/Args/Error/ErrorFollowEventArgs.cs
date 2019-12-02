@@ -1,7 +1,7 @@
-﻿using Twitch.NET.Models.DTOs.Interfaces;
-using Twitch.NET.Models.Interfaces;
+﻿using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.Events.Args.Error
+namespace TwitchBots.NET.Events.Args.Error
 {
     public class ErrorFollowEventArgs : ErrorEventArgs
     {

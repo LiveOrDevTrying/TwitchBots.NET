@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Twitch.NET.Models.DTOs.Interfaces;
-using Twitch.NET.Models.Interfaces;
+using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.DAL
+namespace TwitchBots.NET.DAL
 {
     public interface ITwitchNETDALService
     {

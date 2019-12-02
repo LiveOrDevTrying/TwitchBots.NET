@@ -1,6 +1,6 @@
-﻿using Twitch.NET.Models.Interfaces;
+﻿using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.Models.Interfaces
+namespace TwitchBots.NET.Models.Interfaces
 {
     public interface IMessageServerCommand : IMessageServer
     {

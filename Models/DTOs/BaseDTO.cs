@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Twitch.NET.Models.DTOs
+namespace TwitchBots.NET.Models.DTOs
 {
     public abstract class BaseDTO : IDisposable
     {

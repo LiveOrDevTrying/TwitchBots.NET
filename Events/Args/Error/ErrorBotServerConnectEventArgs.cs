@@ -1,6 +1,6 @@
-﻿using Twitch.NET.Enums;
+﻿using TwitchBots.NET.Enums;
 
-namespace Twitch.NET.Events.Args.Error
+namespace TwitchBots.NET.Events.Args.Error
 {
     public class ErrorBotServerConnectEventArgs : ErrorBotServerEventArgs 
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Twitch.NET.Models.Interfaces
+namespace TwitchBots.NET.Models.Interfaces
 {
     public interface IBaseInterface : IDisposable
     {

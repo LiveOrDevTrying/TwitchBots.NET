@@ -1,4 +1,4 @@
-﻿namespace Twitch.NET.Enums
+﻿namespace TwitchBots.NET.Enums
 {
     public enum ConnectionEventType
     {

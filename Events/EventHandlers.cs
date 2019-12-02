@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Twitch.NET.Events.Args;
+using TwitchBots.NET.Events.Args;
 
-namespace Twitch.NET.Events
+namespace TwitchBots.NET.Events
 {
     public delegate Task TwitchNETEventHandler<T>(object sender, T args) where T : BaseEventArgs;
 }

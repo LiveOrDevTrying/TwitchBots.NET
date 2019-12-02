@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Twitch.NET.Events;
-using Twitch.NET.Events.Args.ColorChange;
-using Twitch.NET.Events.Args.Connection;
-using Twitch.NET.Events.Args.Error;
-using Twitch.NET.Events.Args.Follows;
-using Twitch.NET.Events.Args.Message;
-using Twitch.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Events;
+using TwitchBots.NET.Events.Args.ColorChange;
+using TwitchBots.NET.Events.Args.Connection;
+using TwitchBots.NET.Events.Args.Error;
+using TwitchBots.NET.Events.Args.Follows;
+using TwitchBots.NET.Events.Args.Message;
+using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchLib.Client;
 using TwitchLib.Client.Enums;
 
-namespace Twitch.NET.Models.Interfaces
+namespace TwitchBots.NET.Models.Interfaces
 {
     public interface IServer : IBaseInterface
     {
@@ -37,5 +38,6 @@ namespace Twitch.NET.Models.Interfaces
         ChatColorPresets CurrentBotChatColor { get; }
         string CurrentBotChatColorHex { get; }
         int NumberMessagesQueued { get; }
+        TwitchClient Client { get; }
     }
 }

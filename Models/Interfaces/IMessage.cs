@@ -1,8 +1,8 @@
 ﻿using System;
-using Twitch.NET.Enums;
-using Twitch.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Enums;
+using TwitchBots.NET.Models.DTOs.Interfaces;
 
-namespace Twitch.NET.Models.Interfaces
+namespace TwitchBots.NET.Models.Interfaces
 {
     public interface IMessage
     {

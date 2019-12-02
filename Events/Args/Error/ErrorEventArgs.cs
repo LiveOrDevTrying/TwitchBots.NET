@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Twitch.NET.Events.Args.Error
+namespace TwitchBots.NET.Events.Args.Error
 {
     public abstract class ErrorEventArgs : BaseEventArgs
     {

@@ -3,20 +3,20 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Twitch.NET.DAL;
-using Twitch.NET.Events;
-using Twitch.NET.Events.Args.ColorChange;
-using Twitch.NET.Events.Args.Connection;
-using Twitch.NET.Events.Args.Error;
-using Twitch.NET.Events.Args.Follows;
-using Twitch.NET.Events.Args.Message;
-using Twitch.NET.Models;
-using Twitch.NET.Models.DTOs;
-using Twitch.NET.Models.Interfaces;
+using TwitchBots.NET.DAL;
+using TwitchBots.NET.Events;
+using TwitchBots.NET.Events.Args.ColorChange;
+using TwitchBots.NET.Events.Args.Connection;
+using TwitchBots.NET.Events.Args.Error;
+using TwitchBots.NET.Events.Args.Follows;
+using TwitchBots.NET.Events.Args.Message;
+using TwitchBots.NET.Models;
+using TwitchBots.NET.Models.DTOs;
+using TwitchBots.NET.Models.Interfaces;
 using TwitchLib.Api.Interfaces;
 using TwitchLib.Client;
 
-namespace Twitch.NET.Managers
+namespace TwitchBots.NET.Managers
 {
     public sealed class ServerManager : IDisposable
     {
@@ -246,6 +246,22 @@ namespace Twitch.NET.Managers
         {
             get
             {
+                var queue = new Queue<IServer>();
+
+                foreach (var server in _servers.ToList())
+                {
+                    if (server.Client.IsConnected &&
+                        server.Client.JoinedChannels.Any(s => s.Channel.Trim().ToLower() == server.ServerDTO.Username.Trim().ToLower()))
+                    {
+                        queue.Enqueue(server);
+                    }
+                    else
+                    {
+                        LeaveServer(server);
+                    }
+                }
+
+                _servers = new ConcurrentQueue<IServer>(queue);
                 return _servers.ToList();
             }
         }

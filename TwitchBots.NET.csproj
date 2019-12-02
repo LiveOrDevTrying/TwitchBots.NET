@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>Rob Engel - LiveOrDevTrying</Authors>
+    <Company>Pixel Horror Studios</Company>
+    <Description>An async / await wrapper of TwitchLib that supports multiple bots in multiple channels with an interface allowing you to create your own data-access-layer or in-memory service.</Description>
+    <Copyright>Copyright 2019</Copyright>
+    <PackageProjectUrl>https://github.com/liveordevtrying/twitch.net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/liveordevtrying/twitch.net</RepositoryUrl>
+    <RepositoryType>GitHub Public</RepositoryType>
+    <PackageTags>Twitch twitchlib multiple bots channels tcp async await</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TwitchLib" Version="3.0.1" />
+  </ItemGroup>
+
+</Project>

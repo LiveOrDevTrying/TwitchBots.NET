@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Twitch.NET.Models.DTOs;
-using Twitch.NET.Models.DTOs.Interfaces;
-using Twitch.NET.Models.Interfaces;
+using TwitchBots.NET.Models.DTOs;
+using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.DAL
+namespace TwitchBots.NET.DAL
 {
     public class TwitchNETDALInMemoryService : ITwitchNETDALService
     {

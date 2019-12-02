@@ -1,4 +1,4 @@
-﻿namespace Twitch.NET.Events.Args.Error
+﻿namespace TwitchBots.NET.Events.Args.Error
 {
     public class ErrorBotServerColorChangeEventArgs : ErrorBotServerEventArgs
     {

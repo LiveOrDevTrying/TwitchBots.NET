@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Twitch.NET.Events;
-using Twitch.NET.Events.Args.ColorChange;
-using Twitch.NET.Events.Args.Connection;
-using Twitch.NET.Events.Args.Error;
-using Twitch.NET.Events.Args.Follows;
-using Twitch.NET.Events.Args.Message;
-using Twitch.NET.Models;
-using Twitch.NET.Models.DTOs.Interfaces;
-using Twitch.NET.Models.Interfaces;
+using TwitchBots.NET.Events;
+using TwitchBots.NET.Events.Args.ColorChange;
+using TwitchBots.NET.Events.Args.Connection;
+using TwitchBots.NET.Events.Args.Error;
+using TwitchBots.NET.Events.Args.Follows;
+using TwitchBots.NET.Events.Args.Message;
+using TwitchBots.NET.Models;
+using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Models.Interfaces;
 using TwitchLib.Client.Enums;
 
-namespace Twitch.NET
+namespace TwitchBots.NET
 {
     public interface ITwitchNET : IDisposable
     {

@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Models.Extensions.NetCore;
 
-namespace Twitch.NET.Utils
+namespace TwitchBots.NET.Utils
 {
     public static class TwitchNETUtils
     {
@@ -82,6 +83,12 @@ namespace Twitch.NET.Utils
                 default:
                     return string.Empty;
             }
+        }
+
+        public static int GetRateLimit()
+        {
+            // 20 messages each 30000 MS with 80% of total time to buffer
+            return Convert.ToInt32(Math.Ceiling(30000f / 20f * 0.8f));
         }
     }
 }

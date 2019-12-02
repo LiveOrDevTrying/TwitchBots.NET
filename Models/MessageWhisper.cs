@@ -1,9 +1,9 @@
 ﻿using System;
-using Twitch.NET.Enums;
-using Twitch.NET.Models.DTOs.Interfaces;
-using Twitch.NET.Models.Interfaces;
+using TwitchBots.NET.Enums;
+using TwitchBots.NET.Models.DTOs.Interfaces;
+using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.Models
+namespace TwitchBots.NET.Models
 {
     public struct MessageWhisper : IMessageWhisper
     {

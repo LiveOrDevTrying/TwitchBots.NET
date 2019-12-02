@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Twitch.NET.Events.Args
+namespace TwitchBots.NET.Events.Args
 {
     public abstract class BaseEventArgs : EventArgs
     {

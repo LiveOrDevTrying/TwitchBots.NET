@@ -1,7 +1,7 @@
-﻿using Twitch.NET.Enums;
-using Twitch.NET.Models.Interfaces;
+﻿using TwitchBots.NET.Enums;
+using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.Events.Args.Message
+namespace TwitchBots.NET.Events.Args.Message
 {
     public class MessageWhisperEventArgs : MessageEventArgs
     {

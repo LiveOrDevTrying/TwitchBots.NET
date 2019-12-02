@@ -1,6 +1,6 @@
-﻿using Twitch.NET.Models.Interfaces;
+﻿using TwitchBots.NET.Models.Interfaces;
 
-namespace Twitch.NET.Events.Args.Error
+namespace TwitchBots.NET.Events.Args.Error
 {
     public class ErrorMessageServerCommandEventArgs : ErrorMessageEventArgs
     {
