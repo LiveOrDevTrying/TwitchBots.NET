@@ -6,18 +6,21 @@
     <title>$title$</title>
     <authors>Rob Engel - LiveOrDevTrying</authors>
     <owners>Pixel Horror Studios</owners>
-    <licenseUrl>https://github.com/LiveOrDevTrying/TwitchBots.NET/blob/master/LICENSE</licenseUrl>
+    <license type="expression">Apache-2.0</license>
     <projectUrl>https://github.com/LiveOrDevTrying/TwitchBots.NET</projectUrl>
-    <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <icon>Logo.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An async / await wrapper of TwitchLib that supports multiple bots in multiple channels with an interface allowing you to create your own data-access-layer or in-memory service.</description>
     <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
     <copyright>Copyright 2019</copyright>
-    <tags>Twitch twitchlib library multiple irc chat bots c# csharp channels api events tcp net core 2.1 2.0 async await</tags>
+    <tags>Twitch twitchbots.net twitchbots twitchlib library multiple irc chat bots c# csharp channels api events tcp net core 2.1 2.0 async await</tags>
     <dependencies>
       <group targetFramework="net21">
         <dependency id="TwitchLib" version="3.0.1" />
       </group>
     </dependencies>
   </metadata>
+  <files>
+    <file src="Logo.png" target="" />
+  </files>
 </package>
