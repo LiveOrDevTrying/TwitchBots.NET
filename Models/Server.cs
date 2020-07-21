@@ -87,13 +87,13 @@ namespace TwitchBots.NET.Models
 
             _messagesQueued.Enqueue(message);
         }
-        public virtual void SendMessageImmediate(string message)
+        public virtual async Task SendMessageImmediateAsync(string message)
         {
             try
             {
                 _client.SendMessage(_serverDTO.Username.Trim().ToLower(), message);
 
-                FireMessageServerChatEvent(this, new MessageServerChatEventArgs
+                await FireMessageServerChatEventAsync(this, new MessageServerChatEventArgs
                 {
                     Message = new MessageServerChat
                     {
@@ -110,7 +110,7 @@ namespace TwitchBots.NET.Models
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorMessageServerChatEventArgs
+                await FireErrorEventAsync(this, new ErrorMessageServerChatEventArgs
                 {
                     Bot = _bot,
                     ChatColor = CurrentBotChatColorHex,
@@ -130,13 +130,13 @@ namespace TwitchBots.NET.Models
 
             _messagesQueued.Enqueue(message);
         }
-        public virtual void SendCommandImmediate(string command)
+        public virtual async Task SendCommandImmediateAsync(string command)
         {
             try
             {
                 _client.SendMessage(_serverDTO.Username.Trim().ToLower(), $"/me {command}");
 
-                FireMessageServerCommandEvent(this, new MessageServerCommandEventArgs
+                await FireMessageServerCommandEventAsync(this, new MessageServerCommandEventArgs
                 {
                     Message = new MessageServerCommand
                     {
@@ -153,7 +153,7 @@ namespace TwitchBots.NET.Models
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorMessageServerCommandEventArgs
+                await FireErrorEventAsync(this, new ErrorMessageServerCommandEventArgs
                 {
                     ChatColor = TwitchNETUtils.GetHexCode(_botChatColor),
                     ErrorMessageEventType = ErrorMessageEventType.Sending,
@@ -176,95 +176,101 @@ namespace TwitchBots.NET.Models
             {
                 if (TwitchNETUtils.GetChatColor(message.ChatColor) != _botChatColor)
                 {
-                    try
+                    Task.Run(async () =>
                     {
-                        // Change the chat color
-                        _botChatColor = TwitchNETUtils.GetChatColor(message.ChatColor);
-                        ChangeChatColorExt.ChangeChatColor(_client,
-                            _client.JoinedChannels.FirstOrDefault(s => s.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower()),
-                            _botChatColor);
+                        try
+                        {
+                            // Change the chat color
+                            _botChatColor = TwitchNETUtils.GetChatColor(message.ChatColor);
+                            ChangeChatColorExt.ChangeChatColor(_client,
+                                _client.JoinedChannels.FirstOrDefault(s => s.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower()),
+                                _botChatColor);
 
-                        FireServerChatColorChangeEvent(this, new ServerChatColorChangeEventArgs
+                            await FireServerChatColorChangeEventAsync(this, new ServerChatColorChangeEventArgs
+                            {
+                                Bot = _bot,
+                                HexColorCode = TwitchNETUtils.GetHexCode(_botChatColor),
+                                Server = this,
+                                ServerChatColorChangeEventType = ServerChatColorChangeEventType.Initiated
+                            });
+                        }
+                        catch (Exception ex)
                         {
-                            Bot = _bot,
-                            HexColorCode = TwitchNETUtils.GetHexCode(_botChatColor),
-                            Server = this,
-                            ServerChatColorChangeEventType = ServerChatColorChangeEventType.Initiated
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        FireErrorEvent(this, new ErrorBotServerColorChangeEventArgs
-                        {
-                            Bot = _bot,
-                            Exception = ex,
-                            HexCode = TwitchNETUtils.GetHexCode(_botChatColor),
-                            Server = this
-                        });
-                    }
+                            await FireErrorEventAsync(this, new ErrorBotServerColorChangeEventArgs
+                            {
+                                Bot = _bot,
+                                Exception = ex,
+                                HexCode = TwitchNETUtils.GetHexCode(_botChatColor),
+                                Server = this
+                            });
+                        }
+                    });
                 }
                 else
                 {
                     if (_messagesQueued.TryDequeue(out message))
                     {
-                        switch (message)
+                        Task.Run(async () =>
                         {
-                            case IMessageServerChat e:
-                                try
-                                {
-                                    _client.SendMessage(_serverDTO.Username.Trim().ToLower(), message.MessageText);
+                            switch (message)
+                            {
+                                case IMessageServerChat e:
+                                    try
+                                    {
+                                        _client.SendMessage(_serverDTO.Username.Trim().ToLower(), message.MessageText);
 
-                                    FireMessageServerChatEvent(this, new MessageServerChatEventArgs
+                                        await FireMessageServerChatEventAsync(this, new MessageServerChatEventArgs
+                                        {
+                                            Message = e
+                                        });
+                                    }
+                                    catch (Exception ex)
                                     {
-                                        Message = e
-                                    });
-                                }
-                                catch (Exception ex)
-                                {
-                                    FireErrorEvent(this, new ErrorMessageServerChatEventArgs
+                                        await FireErrorEventAsync(this, new ErrorMessageServerChatEventArgs
+                                        {
+                                            Bot = _bot,
+                                            ChatColor = TwitchNETUtils.GetHexCode(_botChatColor),
+                                            ErrorMessageEventType = ErrorMessageEventType.Sending,
+                                            ErrorMessageSendType = ErrorMessageSendType.QueuedSent,
+                                            Exception = ex,
+                                            Message = message.MessageText
+                                        });
+                                    }
+                                    break;
+                                case IMessageServerCommand e:
+                                    try
                                     {
-                                        Bot = _bot,
-                                        ChatColor = TwitchNETUtils.GetHexCode(_botChatColor),
-                                        ErrorMessageEventType = ErrorMessageEventType.Sending,
-                                        ErrorMessageSendType = ErrorMessageSendType.QueuedSent,
-                                        Exception = ex,
-                                        Message = message.MessageText
-                                    });
-                                }
-                                break;
-                            case IMessageServerCommand e:
-                                try
-                                {
-                                    _client.SendMessage(_serverDTO.Username.Trim().ToLower(), $"/me {message.MessageText}");
+                                        _client.SendMessage(_serverDTO.Username.Trim().ToLower(), $"/me {message.MessageText}");
 
-                                    FireMessageServerCommandEvent(this, new MessageServerCommandEventArgs
+                                        await FireMessageServerCommandEventAsync(this, new MessageServerCommandEventArgs
+                                        {
+                                            Message = e
+                                        });
+                                    }
+                                    catch (Exception ex)
                                     {
-                                        Message = e
-                                    });
-                                }
-                                catch (Exception ex)
-                                {
-                                    FireErrorEvent(this, new ErrorMessageServerCommandEventArgs
-                                    {
-                                        Bot = _bot,
-                                        ChatColor = TwitchNETUtils.GetHexCode(_botChatColor),
-                                        ErrorMessageEventType = ErrorMessageEventType.Sending,
-                                        ErrorMessageSendType = ErrorMessageSendType.QueuedSent,
-                                        Exception = ex,
-                                        Message = message.MessageText
-                                    });
-                                }
-                                break;
-                            default:
-                                break;
-                        }
+                                        await FireErrorEventAsync(this, new ErrorMessageServerCommandEventArgs
+                                        {
+                                            Bot = _bot,
+                                            ChatColor = TwitchNETUtils.GetHexCode(_botChatColor),
+                                            ErrorMessageEventType = ErrorMessageEventType.Sending,
+                                            ErrorMessageSendType = ErrorMessageSendType.QueuedSent,
+                                            Exception = ex,
+                                            Message = message.MessageText
+                                        });
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        });
                     }
                 }
             }
         }
-        public virtual void FollowReceived(IUserDTO[] users)
+        public virtual async Task FollowReceived(IUserDTO[] users)
         {
-            FireFollowEvent(this, new FollowEventArgs
+            await FireFollowEventAsync(this, new FollowEventArgs
             {
                 NewFollows = users,
                 Server = this,
@@ -333,7 +339,7 @@ namespace TwitchBots.NET.Models
                             await _twitchNetService.CreateUsersOnlineAsync(this, usersOnline.ToArray());
                         }
 
-                        FireMessageServerChatEvent(sender, new MessageServerChatEventArgs
+                        await FireMessageServerChatEventAsync(sender, new MessageServerChatEventArgs
                         {
                             Message = new MessageServerChat
                             {
@@ -348,9 +354,9 @@ namespace TwitchBots.NET.Models
                             },
                         });
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        FireErrorEvent(sender, new ErrorMessageServerChatEventArgs
+                        await FireErrorEventAsync(sender, new ErrorMessageServerChatEventArgs
                         {
                             Bot = _bot,
                             ChatColor = args.ChatMessage.ColorHex,
@@ -365,57 +371,64 @@ namespace TwitchBots.NET.Models
         }
         protected virtual void OnJoinedChannel(object sender, OnJoinedChannelArgs args)
         {
-            try
+            Task.Run(async () =>
             {
-                if (args.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower())
+                try
                 {
-                    FireConnectionServerBotEvent(sender, new ConnectionServerBotEventArgs
+                    if (args.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower())
                     {
-                        Server = this,
-                        ConnectionEventType = ConnectionEventType.ConnectedToTwitch,
-                        ConnectionServerEventType = ConnectionServerEventType.ConnectedToServer,
+                        await FireConnectionServerBotEventAsync(sender, new ConnectionServerBotEventArgs
+                        {
+                            Server = this,
+                            ConnectionEventType = ConnectionEventType.ConnectedToTwitch,
+                            ConnectionServerEventType = ConnectionServerEventType.ConnectedToServer,
+                            Bot = _bot,
+                        });
+                    }
+
+                    StartFollowerService();
+                }
+                catch (Exception ex)
+                {
+                    await FireErrorEventAsync(sender, new ErrorBotServerConnectEventArgs
+                    {
                         Bot = _bot,
+                        ErrorBotServerConnectEventType = ErrorBotServerConnectEventType.JoinChannel,
+                        Exception = ex,
+                        Server = this,
                     });
                 }
+            });
 
-                StartFollowerService();
-            }
-            catch (Exception ex)
-            {
-                FireErrorEvent(sender, new ErrorBotServerConnectEventArgs
-                {
-                    Bot = _bot,
-                    ErrorBotServerConnectEventType = ErrorBotServerConnectEventType.JoinChannel,
-                    Exception = ex,
-                    Server = this,
-                });
-            }
         }
         protected virtual void OnLeaveChannel(object sender, OnLeftChannelArgs args)
         {
-            try
+            Task.Run(async () =>
             {
-                if (args.Channel.Trim().ToLower() == args.Channel.Trim().ToLower())
+                try
                 {
-                    FireConnectionServerBotEvent(sender, new ConnectionServerBotEventArgs
+                    if (args.Channel.Trim().ToLower() == args.Channel.Trim().ToLower())
                     {
-                        ConnectionServerEventType = ConnectionServerEventType.DisconnectedFromServer,
-                        ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
-                        Server = this,
-                        Bot = _bot
+                        await FireConnectionServerBotEventAsync(sender, new ConnectionServerBotEventArgs
+                        {
+                            ConnectionServerEventType = ConnectionServerEventType.DisconnectedFromServer,
+                            ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
+                            Server = this,
+                            Bot = _bot
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await FireErrorEventAsync(sender, new ErrorBotServerConnectEventArgs
+                    {
+                        Bot = _bot,
+                        ErrorBotServerConnectEventType = ErrorBotServerConnectEventType.LeaveChannel,
+                        Exception = ex,
+                        Server = this
                     });
                 }
-            }
-            catch (Exception ex)
-            {
-                FireErrorEvent(sender, new ErrorBotServerConnectEventArgs
-                {
-                    Bot = _bot,
-                    ErrorBotServerConnectEventType = ErrorBotServerConnectEventType.LeaveChannel,
-                    Exception = ex,
-                    Server = this
-                });
-            }
+            });
         }
         protected virtual void OnNewSubscriber(object sender, OnNewSubscriberArgs args)
         {
@@ -454,7 +467,7 @@ namespace TwitchBots.NET.Models
                             await _twitchNetService.CreateUsersOnlineAsync(this, usersOnline.ToArray());
                         }
 
-                        FireConnectionServerUserEvent(sender, new ConnectionServerUserEventArgs
+                        await FireConnectionServerUserEventAsync(sender, new ConnectionServerUserEventArgs
                         {
                             ConnectionServerEventType = ConnectionServerEventType.ConnectedToServer,
                             ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
@@ -464,7 +477,7 @@ namespace TwitchBots.NET.Models
                     }
                     catch (Exception ex)
                     {
-                        FireErrorEvent(sender, new ErrorBotServerUserEventArgs
+                        await FireErrorEventAsync(sender, new ErrorBotServerUserEventArgs
                         {
                             Bot = _bot,
                             Exception = ex,
@@ -494,7 +507,7 @@ namespace TwitchBots.NET.Models
 
                             await _twitchNetService.CreateUsersOnlineAsync(this, usersOnline.ToArray());
 
-                            FireConnectionServerUserEvent(sender, new ConnectionServerUserEventArgs
+                            await FireConnectionServerUserEventAsync(sender, new ConnectionServerUserEventArgs
                             {
                                 ConnectionServerEventType = ConnectionServerEventType.DisconnectedFromServer,
                                 ConnectionEventType = ConnectionEventType.DisconnectedFromTwitch,
@@ -505,7 +518,7 @@ namespace TwitchBots.NET.Models
                     }
                     catch (Exception ex)
                     {
-                        FireErrorEvent(sender, new ErrorBotServerUserEventArgs
+                        await FireErrorEventAsync(sender, new ErrorBotServerUserEventArgs
                         {
                             Bot = _bot,
                             Exception = ex,
@@ -522,12 +535,15 @@ namespace TwitchBots.NET.Models
             {
                 _isWaitingForColorChange = false;
 
-                FireServerChatColorChangeEvent(sender, new ServerChatColorChangeEventArgs
+                Task.Run(async () =>
                 {
-                    Bot = _bot,
-                    HexColorCode = TwitchNETUtils.GetHexCode(_botChatColor),
-                    Server = this,
-                    ServerChatColorChangeEventType = ServerChatColorChangeEventType.Confirmed
+                    await FireServerChatColorChangeEventAsync(sender, new ServerChatColorChangeEventArgs
+                    {
+                        Bot = _bot,
+                        HexColorCode = TwitchNETUtils.GetHexCode(_botChatColor),
+                        Server = this,
+                        ServerChatColorChangeEventType = ServerChatColorChangeEventType.Confirmed
+                    });
                 });
             }
         }
@@ -569,7 +585,7 @@ namespace TwitchBots.NET.Models
                         users.Add(user);
                     }
 
-                    FireFollowEvent(this, new FollowEventArgs
+                    await FireFollowEventAsync(this, new FollowEventArgs
                     {
                         Server = this,
                         NewFollows = users.ToArray()
@@ -577,7 +593,7 @@ namespace TwitchBots.NET.Models
                 }
                 catch (Exception ex)
                 {
-                    FireErrorEvent(sender, new ErrorFollowEventArgs
+                    await FireErrorEventAsync(sender, new ErrorFollowEventArgs
                     {
                         Exception = ex,
                         UserIdsFollowed = args.NewFollowers.Select(s => s.FromUserId).ToArray(),
@@ -585,43 +601,42 @@ namespace TwitchBots.NET.Models
                 }
             });
         }
-        protected virtual Task OnFollowFromServerEvent(object sender, FollowEventArgs args)
+        protected virtual async Task OnFollowFromServerEvent(object sender, FollowEventArgs args)
         {
-            FireFollowEvent(sender, args);
-            return Task.CompletedTask;
+            await FireFollowEventAsync(sender, args);
         }
 
-        protected virtual void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        protected virtual async Task FireConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            ConnectionBotEvent?.Invoke(sender, args);
+            await ConnectionBotEvent?.Invoke(sender, args);
         }
-        protected virtual void FireConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        protected virtual async Task FireConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            ConnectionServerBotEvent?.Invoke(sender, args);
+            await ConnectionServerBotEvent?.Invoke(sender, args);
         }
-        protected virtual void FireConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        protected virtual async Task FireConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            ConnectionServerUserEvent?.Invoke(sender, args);
+            await ConnectionServerUserEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        protected virtual async Task FireMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            MessageServerChatEvent?.Invoke(sender, args);
+            await MessageServerChatEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        protected virtual async Task FireMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            MessageServerCommandEvent?.Invoke(sender, args);
+            await MessageServerCommandEvent?.Invoke(sender, args);
         }
-        protected virtual void FireFollowEvent(object sender, FollowEventArgs args)
+        protected virtual async Task FireFollowEventAsync(object sender, FollowEventArgs args)
         {
-            FollowEvent?.Invoke(sender, args);
+            await FollowEvent?.Invoke(sender, args);
         }
-        protected virtual void FireServerChatColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        protected virtual async Task FireServerChatColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            ColorChangeEvent?.Invoke(sender, args);
+            await ColorChangeEvent?.Invoke(sender, args);
         }
-        protected virtual void FireErrorEvent(object sender, ErrorEventArgs args)
+        protected virtual async Task FireErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            ErrorEvent?.Invoke(sender, args);
+            await ErrorEvent?.Invoke(sender, args);
         }
 
         public virtual void Dispose()

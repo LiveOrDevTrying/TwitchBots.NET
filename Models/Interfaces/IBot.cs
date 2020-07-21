@@ -28,21 +28,21 @@ namespace TwitchBots.NET.Models.Interfaces
         event TwitchNETEventHandler<ServerChatColorChangeEventArgs> ColorChangeEvent;
         event TwitchNETEventHandler<ErrorEventArgs> ErrorEvent;
 
-        void Connect(BotCredentials botCredentials);
-        void Disconnect();
+        Task ConnectAsync(BotCredentials botCredentials);
+        Task DisconnectAsync();
 
         ICollection<IServer> GetServersConnected();
 
         Task<IServer> JoinServerAsync(string userOrServerName);
-        void LeaveServer(IServer server);
+        Task LeaveServerAsync(IServer server);
 
         void SendCommand(IServer server, string message, ChatColorPresets chatColor);
         void SendCommand(IServer server, string message, string hexCodeColor);
-        bool SendCommandImmediate(IServer server, string message);
         void SendMessage(IServer server, string message, ChatColorPresets chatColor);
         void SendMessage(IServer server, string message, string hexCodeColor);
-        bool SendMessageImmediate(IServer server, string message);
+        Task<bool> SendCommandImmediateAsync(IServer server, string message);
+        Task<bool> SendMessageImmediateAsync(IServer server, string message);
+        Task<bool> SendWhisperImmediateAsync(IUserDTO user, string message);
         void SendWhisper(IUserDTO user, string message);
-        bool SendWhisperImmediate(IUserDTO user, string message);
     }
 }

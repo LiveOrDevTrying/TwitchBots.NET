@@ -56,7 +56,7 @@ namespace TwitchBots.NET
                 return null;
             }
 
-            var instance = _twitchNETBotManager.AddBot(credentials, bot, reconnectIntervalSec * 1000);
+            var instance = await _twitchNETBotManager.AddBotAsync(credentials, bot, reconnectIntervalSec * 1000);
             instance.ConnectionBotEvent += OnConnectionBotEvent;
             instance.ConnectionServerBotEvent += OnConnectionServerBotEvent;
             instance.ConnectionServerUserEvent += OnConnectionServerUserEvent;
@@ -93,10 +93,9 @@ namespace TwitchBots.NET
         }
         public virtual async Task<bool> DisconnectBotFromServerAsync(IServer server)
         {
-            server.Bot.LeaveServer(server);
+            await server.Bot.LeaveServerAsync(server);
             server.Dispose();
-
-            return await Task.FromResult(true);
+            return true;
         }
 
         public virtual void SendMessageToServer(IBot bot, IServer server, string message, ChatColorPresets chatColor)
@@ -107,21 +106,21 @@ namespace TwitchBots.NET
         {
             bot.SendMessage(server, message, colorHexCode);
         }
-        public virtual void SendMessageToServerImmediate(IBot bot, IServer server, string message)
+        public virtual async Task SendMessageToServerImmediateAsync(IBot bot, IServer server, string message)
         {
-            bot.SendMessageImmediate(server, message);
+            await bot.SendMessageImmediateAsync(server, message);
         }
         public virtual void SendCommandToServer(IBot bot, IServer server, string message, ChatColorPresets chatColor)
         {
-                bot.SendCommand(server, message, chatColor);
+            bot.SendCommand(server, message, chatColor);
         }
         public virtual void SendCommandToServer(IBot bot, IServer server, string message, string hexCodeColor)
         {
             bot.SendCommand(server, message, hexCodeColor);
         }
-        public virtual void SendCommandToServerImmediate(IBot bot, IServer server, string message)
+        public virtual async Task SendCommandToServerImmediateAsync(IBot bot, IServer server, string message)
         {
-            bot.SendCommandImmediate(server, message);
+            await bot.SendCommandImmediateAsync(server, message);
         }
 
         public virtual async Task<IUserDTO> GetUserAsync(Guid id)
@@ -132,7 +131,7 @@ namespace TwitchBots.NET
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorDataUserEventArgs
+                await FireErrorEventAsync(this, new ErrorDataUserEventArgs
                 {
                     Exception = ex,
                     UserId = id,
@@ -150,7 +149,7 @@ namespace TwitchBots.NET
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorDataBotEventArgs
+                await FireErrorEventAsync(this, new ErrorDataBotEventArgs
                 {
                     Exception = ex,
                     ErrorDataEventType = ErrorDataEventType.Get,
@@ -161,87 +160,77 @@ namespace TwitchBots.NET
             return null;
         }
 
-        protected virtual Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        protected virtual async Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
         {
-            FireConnectionBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionBotEventAsync(sender, args);
         }
-        protected virtual Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        protected virtual async Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
         {
-            FireConnectionServerBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerBotEventAsync(sender, args);
         }
-        protected virtual Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        protected virtual async Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
         {
-            FireMessageServerChatEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerChatEventAsync(sender, args);
         }
-        protected virtual Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        protected virtual async Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
         {
-            FireMessageServerCommandEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerCommandEventAsync(sender, args);
         }
-        protected virtual Task OnMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        protected virtual async Task OnMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
         {
-            FireMessageWhisperEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageWhisperEventAsync(sender, args);
         }
-        protected virtual Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        protected virtual async Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
         {
-            FireConnectionServerUserEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerUserEventAsync(sender, args);
         }
-        protected virtual Task OnFollowEvent(object sender, FollowEventArgs args)
+        protected virtual async Task OnFollowEvent(object sender, FollowEventArgs args)
         {
-            FireFollowEvent(sender, args);
-            return Task.CompletedTask;
+            await FireFollowEventAsync(sender, args);
         }
-        protected virtual Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        protected virtual async Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {
-            FireColorChangeEvent(sender, args);
-            return Task.CompletedTask;
+            await FireColorChangeEventAsync(sender, args);
         }
-        protected virtual Task OnErrorEvent(object sender, ErrorEventArgs args)
+        protected virtual async Task OnErrorEvent(object sender, ErrorEventArgs args)
         {
-            FireErrorEvent(sender, args);
-            return Task.CompletedTask;
+            await FireErrorEventAsync(sender, args);
         }
-
-        protected virtual void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        protected virtual async Task FireConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            ConnectionBotEvent?.Invoke(sender, args);
+            await ConnectionBotEvent?.Invoke(sender, args);
         }
-        protected virtual void FireConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        protected virtual async Task FireConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            ConnectionServerBotEvent?.Invoke(sender, args);
+            await ConnectionServerBotEvent?.Invoke(sender, args);
         }
-        protected virtual void FireConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        protected virtual async Task FireConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            ConnectionServerUserEvent?.Invoke(sender, args);
+            await ConnectionServerUserEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        protected virtual async Task FireMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            MessageServerChatEvent?.Invoke(sender, args);
+            await MessageServerChatEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        protected virtual async Task FireMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            MessageServerCommandEvent?.Invoke(sender, args);
+            await MessageServerCommandEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        protected virtual async Task FireMessageWhisperEventAsync(object sender, MessageWhisperEventArgs args)
         {
-            MessageWhisperEvent?.Invoke(sender, args);
+            await MessageWhisperEvent?.Invoke(sender, args);
         }
-        protected virtual void FireFollowEvent(object sender, FollowEventArgs args)
+        protected virtual async Task FireFollowEventAsync(object sender, FollowEventArgs args)
         {
-            FollowEvent?.Invoke(sender, args);
+            await FollowEvent?.Invoke(sender, args);
         }
-        protected virtual void FireColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        protected virtual async Task FireColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            ColorChangeEvent?.Invoke(sender, args);
+            await ColorChangeEvent?.Invoke(sender, args);
         }
-        protected virtual void FireErrorEvent(object sender, ErrorEventArgs args)
+        protected virtual async Task FireErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            ErrorEvent?.Invoke(sender, args);
+            await ErrorEvent?.Invoke(sender, args);
         }
 
         public virtual void Dispose()

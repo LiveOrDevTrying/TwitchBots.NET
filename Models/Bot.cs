@@ -62,7 +62,7 @@ namespace TwitchBots.NET.Models
             _intervalReconnectMS = intervalReconnectMS;
         }
 
-        public virtual void Connect(BotCredentials botCredentials)
+        public virtual async Task ConnectAsync(BotCredentials botCredentials)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace TwitchBots.NET.Models
                 _botCredentials = botCredentials;
                 var credentials = new ConnectionCredentials(_botCredentials.Username, _botCredentials.OAuthToken);
 
-                Disconnect();
+                await DisconnectAsync();
 
                 _isRunning = true;
 
@@ -88,20 +88,20 @@ namespace TwitchBots.NET.Models
                 _client.OnDisconnected += OnDisconnected;
 
                 _serverManager = new ServerManager(_twitchNetService, _client, _twitchAPI, this, botCredentials.MaxMessagesInQueue);
-                _serverManager.ConnectionBotEvent += OnConnectionBotEvent;
-                _serverManager.ConnectionServerBotEvent += OnConnectionServerBotEvent;
-                _serverManager.ConnectionServerUserEvent += OnConnectionServerUserEvent;
-                _serverManager.MessageServerChatEvent += OnMessageServerChatEvent;
-                _serverManager.MessageServerCommandEvent += OnMessageServerCommandEvent;
-                _serverManager.FollowEvent += OnFollowEvent;
-                _serverManager.ColorChangeEvent += OnColorChangeEvent;
-                _serverManager.ErrorEvent += OnErrorEvent;
+                _serverManager.ConnectionBotEvent += OnConnectionBotEventAsync;
+                _serverManager.ConnectionServerBotEvent += OnConnectionServerBotEventAsync;
+                _serverManager.ConnectionServerUserEvent += OnConnectionServerUserEventAsync;
+                _serverManager.MessageServerChatEvent += OnMessageServerChatEventAsync;
+                _serverManager.MessageServerCommandEvent += OnMessageServerCommandEventAsync;
+                _serverManager.FollowEvent += OnFollowEventAsync;
+                _serverManager.ColorChangeEvent += OnColorChangeEventAsync;
+                _serverManager.ErrorEvent += OnErrorEventAsync;
 
                 _client.Connect();
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorBotConnectEventArgs
+                await FireErrorEventAsync(this, new ErrorBotConnectEventArgs
                 {
                     Bot = this,
                     ErrorConnectionEventType = ErrorConnectionEventType.ConnectBot,
@@ -109,7 +109,7 @@ namespace TwitchBots.NET.Models
                 });
             }
         }
-        public virtual void Disconnect()
+        public virtual async Task DisconnectAsync()
         {
             try
             {
@@ -124,14 +124,14 @@ namespace TwitchBots.NET.Models
                 if (_serverManager != null)
                 {
                     _serverManager.Dispose();
-                    _serverManager.ConnectionBotEvent -= OnConnectionBotEvent;
-                    _serverManager.ConnectionServerBotEvent -= OnConnectionServerBotEvent;
-                    _serverManager.ConnectionServerUserEvent -= OnConnectionServerUserEvent;
-                    _serverManager.MessageServerChatEvent -= OnMessageServerChatEvent;
-                    _serverManager.MessageServerCommandEvent -= OnMessageServerCommandEvent;
-                    _serverManager.FollowEvent -= OnFollowEvent;
-                    _serverManager.ColorChangeEvent -= OnColorChangeEvent;
-                    _serverManager.ErrorEvent -= OnErrorEvent;
+                    _serverManager.ConnectionBotEvent -= OnConnectionBotEventAsync;
+                    _serverManager.ConnectionServerBotEvent -= OnConnectionServerBotEventAsync;
+                    _serverManager.ConnectionServerUserEvent -= OnConnectionServerUserEventAsync;
+                    _serverManager.MessageServerChatEvent -= OnMessageServerChatEventAsync;
+                    _serverManager.MessageServerCommandEvent -= OnMessageServerCommandEventAsync;
+                    _serverManager.FollowEvent -= OnFollowEventAsync;
+                    _serverManager.ColorChangeEvent -= OnColorChangeEventAsync;
+                    _serverManager.ErrorEvent -= OnErrorEventAsync;
                     _serverManager = null;
                 }
 
@@ -146,7 +146,7 @@ namespace TwitchBots.NET.Models
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorBotConnectEventArgs
+                await FireErrorEventAsync(this, new ErrorBotConnectEventArgs
                 {
                     Bot = this,
                     ErrorConnectionEventType = ErrorConnectionEventType.DisconnectBot,
@@ -163,7 +163,7 @@ namespace TwitchBots.NET.Models
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorBotConnectServerEventArgs
+                await FireErrorEventAsync(this, new ErrorBotConnectServerEventArgs
                 {
                     Bot = this,
                     Exception = ex,
@@ -174,7 +174,7 @@ namespace TwitchBots.NET.Models
 
             return null;
         }
-        public virtual void LeaveServer(IServer server)
+        public virtual async Task LeaveServerAsync(IServer server)
         {
             try
             {
@@ -182,7 +182,7 @@ namespace TwitchBots.NET.Models
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorBotConnectServerEventArgs
+                await FireErrorEventAsync(this, new ErrorBotConnectServerEventArgs
                 {
                     Bot = this,
                     ErrorConnectionEventType = ErrorConnectionEventType.DisconnectFromServer,
@@ -246,31 +246,31 @@ namespace TwitchBots.NET.Models
                 User = _bot.UserDTO,
             });
         }
-        public virtual bool SendMessageImmediate(IServer server, string message)
+        public virtual async Task<bool> SendMessageImmediateAsync(IServer server, string message)
         {
             if (_client != null &&
                 _client.IsConnected &&
                 _client.JoinedChannels.Any(s => s.Channel.Trim().ToLower() == server.ServerDTO.Username.Trim().ToLower()))
             {
-                server.SendMessageImmediate(message);
+                await server.SendMessageImmediateAsync(message);
                 return true;
             }
 
             return false;
         }
-        public virtual bool SendCommandImmediate(IServer server, string message)
+        public virtual async Task<bool> SendCommandImmediateAsync(IServer server, string message)
         {
             if (_client != null &&
                 _client.IsConnected &&
                 _client.JoinedChannels.Any(s => s.Channel.Trim().ToLower() == server.ServerDTO.Username.Trim().ToLower()))
             {
-                server.SendCommandImmediate(message);
+                await server.SendCommandImmediateAsync(message);
                 return true;
             }
 
             return false;
         }
-        public virtual bool SendWhisperImmediate(IUserDTO user, string message)
+        public virtual async Task<bool> SendWhisperImmediateAsync(IUserDTO user, string message)
         {
             try
             {
@@ -279,7 +279,7 @@ namespace TwitchBots.NET.Models
                 {
                     _client.SendWhisper(user.Username.Trim().ToLower(), message);
 
-                    FireMessageWhisperEvent(this, new MessageWhisperEventArgs
+                    await FireMessageWhisperEventAsync(this, new MessageWhisperEventArgs
                     {
                         Message = new MessageWhisper
                         {
@@ -296,7 +296,7 @@ namespace TwitchBots.NET.Models
             }
             catch (Exception ex)
             {
-                FireErrorEvent(this, new ErrorMessageWhisperEventArgs
+                await FireErrorEventAsync(this, new ErrorMessageWhisperEventArgs
                 {
                     Bot = this,
                     ErrorMessageEventType = ErrorMessageEventType.Sending,
@@ -311,74 +311,80 @@ namespace TwitchBots.NET.Models
 
         protected virtual void OnConnected(object sender, OnConnectedArgs args)
         {
-            try
+            Task.Run(async () =>
             {
-                _isRunning = true;
-
-                if (_timer != null)
+                try
                 {
-                    _timer.Dispose();
+                    _isRunning = true;
+
+                    if (_timer != null)
+                    {
+                        _timer.Dispose();
+                    }
+
+                    _timer = new Timer(OnTimerTick, null, 0, TwitchNETUtils.GetRateLimit());
+
+                    await FireConnectionBotEventAsync(sender, new ConnectionBotEventArgs
+                    {
+                        Bot = this,
+                        ConnectionEventType = ConnectionEventType.ConnectedToTwitch,
+                    });
                 }
-
-                _timer = new Timer(OnTimerTick, null, 0, TwitchNETUtils.GetRateLimit());
-
-                FireConnectionBotEvent(sender, new ConnectionBotEventArgs
+                catch (Exception ex)
                 {
-                    Bot = this,
-                    ConnectionEventType = ConnectionEventType.ConnectedToTwitch,
-                });
-            }
-            catch (Exception ex)
-            {
-                FireErrorEvent(sender, new ErrorBotConnectEventArgs
-                {
-                    Bot = this,
-                    ErrorConnectionEventType = ErrorConnectionEventType.ConnectBot,
-                    Exception = ex
-                });
+                    await FireErrorEventAsync(sender, new ErrorBotConnectEventArgs
+                    {
+                        Bot = this,
+                        ErrorConnectionEventType = ErrorConnectionEventType.ConnectBot,
+                        Exception = ex
+                    });
 
-                Disconnect();
-            }
+                    await DisconnectAsync();
+                }
+            });
         }
         protected virtual void OnDisconnected(object sender, OnDisconnectedEventArgs args)
         {
-            try
+            Task.Run(async () =>
             {
-                _isRunning = false;
-
-                if (_timer != null)
+                try
                 {
-                    _timer.Dispose();
-                    _timer = null;
+                    _isRunning = false;
+
+                    if (_timer != null)
+                    {
+                        _timer.Dispose();
+                        _timer = null;
+                    }
+
+                    if (_serverManager != null)
+                    {
+                        _serverManager.Dispose();
+                    }
+
+                    await FireConnectionBotEventAsync(sender, new ConnectionBotEventArgs
+                    {
+                        Bot = this,
+                        ConnectionEventType = Enums.ConnectionEventType.DisconnectedFromTwitch,
+                    });
+
+                    if (_intervalReconnectMS > 0)
+                    {
+                        Thread.Sleep(_intervalReconnectMS);
+                        await ConnectAsync(_botCredentials);
+                    }
                 }
-
-                if (_serverManager != null)
+                catch (Exception ex)
                 {
-                    _serverManager.Dispose();
+                    await FireErrorEventAsync(sender, new ErrorBotConnectEventArgs
+                    {
+                        Bot = this,
+                        ErrorConnectionEventType = ErrorConnectionEventType.DisconnectBot,
+                        Exception = ex
+                    });
+
                 }
-
-                FireConnectionBotEvent(sender, new ConnectionBotEventArgs
-                {
-                    Bot = this,
-                    ConnectionEventType = Enums.ConnectionEventType.DisconnectedFromTwitch,
-                });
-
-                if (_intervalReconnectMS > 0)
-                {
-                    Thread.Sleep(_intervalReconnectMS);
-                    Connect(_botCredentials);
-                }
-            }
-            catch (Exception ex)
-            {
-                FireErrorEvent(sender, new ErrorBotConnectEventArgs
-                {
-                    Bot = this,
-                    ErrorConnectionEventType = ErrorConnectionEventType.DisconnectBot,
-                    Exception = ex
-                });
-
-            }
+            });
         }
         protected virtual void OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
         {
@@ -410,7 +416,7 @@ namespace TwitchBots.NET.Models
                         });
                     }
 
-                    FireMessageWhisperEvent(sender, new MessageWhisperEventArgs
+                    await FireMessageWhisperEventAsync(sender, new MessageWhisperEventArgs
                     {
                         Message = new MessageWhisper
                         {
@@ -426,7 +432,7 @@ namespace TwitchBots.NET.Models
                 }
                 catch (Exception ex)
                 {
-                    FireErrorEvent(sender, new ErrorMessageWhisperEventArgs
+                    await FireErrorEventAsync(sender, new ErrorMessageWhisperEventArgs
                     {
                         Bot = this,
                         ErrorMessageEventType = ErrorMessageEventType.Receiving,
@@ -452,18 +458,20 @@ namespace TwitchBots.NET.Models
                 _wasServerMessage = false;
                 if (_whispersQueued.TryDequeue(out var message))
                 {
-                    _client.SendWhisper(message.User.Username.Trim().ToLower(), message.MessageText);
-
-                    FireMessageWhisperEvent(this, new MessageWhisperEventArgs
+                    Task.Run(async () =>
                     {
-                        Message = new MessageWhisper
+                        _client.SendWhisper(message.User.Username.Trim().ToLower(), message.MessageText);
+                        await FireMessageWhisperEventAsync(this, new MessageWhisperEventArgs
                         {
-                            Bot = this,
-                            MessageText = message.MessageText,
-                            MessageType = MessageType.Sent,
-                            User = message.User,
-                        },
-                        MessageWhisperEventType = MessageWhisperEventType.Sent
+                            Message = new MessageWhisper
+                            {
+                                Bot = this,
+                                MessageText = message.MessageText,
+                                MessageType = MessageType.Sent,
+                                User = message.User,
+                            },
+                            MessageWhisperEventType = MessageWhisperEventType.Sent
+                        });
                     });
                     return;
                 }
@@ -472,82 +480,74 @@ namespace TwitchBots.NET.Models
             _serverManager.OnTimerTick();
         }
 
-        protected virtual Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        protected virtual async Task OnMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            FireMessageServerCommandEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerCommandEventAsync(sender, args);
         }
-        protected virtual Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        protected virtual async Task OnMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            FireMessageServerChatEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerChatEventAsync(sender, args);
         }
-        protected virtual Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        protected virtual async Task OnConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            FireConnectionServerUserEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerUserEventAsync(sender, args);
         }
-        protected virtual Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        protected virtual async Task OnConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            FireConnectionServerBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerBotEventAsync(sender, args);
         }
-        protected virtual Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        protected virtual async Task OnConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            FireConnectionBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionBotEventAsync(sender, args);
         }
-        protected virtual Task OnFollowEvent(object sender, FollowEventArgs args)
+        protected virtual async Task OnFollowEventAsync(object sender, FollowEventArgs args)
         {
-            FireFollowEvent(sender, args);
-            return Task.CompletedTask;
+            await FireFollowEventAsync(sender, args);
         }
-        protected virtual Task OnErrorEvent(object sender, ErrorEventArgs args)
+        protected virtual async Task OnErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            FireErrorEvent(sender, args);
-            return Task.CompletedTask;
+            await FireErrorEventAsync(sender, args);
         }
-        protected virtual Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        protected virtual async Task OnColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            FireColorChangeEvent(sender, args);
-            return Task.CompletedTask;
+            await FireColorChangeEventAsync(sender, args);
         }
 
-        protected virtual void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        protected virtual async Task FireConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            ConnectionBotEvent?.Invoke(sender, args);
+            await ConnectionBotEvent?.Invoke(sender, args);
         }
-        protected virtual void FireConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        protected virtual async Task FireConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            ConnectionServerBotEvent?.Invoke(sender, args);
+            await ConnectionServerBotEvent?.Invoke(sender, args);
         }
-        protected virtual void FireConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        protected virtual async Task FireConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            ConnectionServerUserEvent?.Invoke(sender, args);
+            await ConnectionServerUserEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        protected virtual async Task FireMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            MessageServerChatEvent?.Invoke(sender, args);
+            await MessageServerChatEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        protected virtual async Task FireMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            MessageServerCommandEvent?.Invoke(sender, args);
+            await MessageServerCommandEvent?.Invoke(sender, args);
         }
-        protected virtual void FireMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        protected virtual async Task FireMessageWhisperEventAsync(object sender, MessageWhisperEventArgs args)
         {
-            MessageWhisperEvent?.Invoke(sender, args);
+            await MessageWhisperEvent?.Invoke(sender, args);
         }
-        protected virtual void FireFollowEvent(object sender, FollowEventArgs args)
+        protected virtual async Task FireFollowEventAsync(object sender, FollowEventArgs args)
         {
-            FollowEvent?.Invoke(sender, args);
+            await FollowEvent?.Invoke(sender, args);
         }
-        protected virtual void FireColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        protected virtual async Task FireColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            ColorChangeEvent?.Invoke(sender, args);
+            await ColorChangeEvent?.Invoke(sender, args);
         }
-        protected virtual void FireErrorEvent(object sender, ErrorEventArgs args)
+        protected virtual async Task FireErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            ErrorEvent?.Invoke(sender, args);
+            await ErrorEvent?.Invoke(sender, args);
         }
 
         public ICollection<IServer> GetServersConnected()
@@ -557,7 +557,7 @@ namespace TwitchBots.NET.Models
 
         public virtual void Dispose()
         {
-            Disconnect();
+            DisconnectAsync().Wait();
         }
 
         public IBotDTO BotDTO

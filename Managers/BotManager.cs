@@ -37,7 +37,7 @@ namespace TwitchBots.NET.Managers
             _twitchNETService = twitchNETService;
         }
 
-        public IBot AddBot(BotCredentials credentials, IBotDTO botDTO, int reconnectIntervalMS)
+        public async Task<IBot> AddBotAsync(BotCredentials credentials, IBotDTO botDTO, int reconnectIntervalMS)
         {
             IBot bot = new Bot(_twitchNETService, botDTO, reconnectIntervalMS);
             bot.ConnectionBotEvent += OnConnectionBotEvent;
@@ -46,10 +46,9 @@ namespace TwitchBots.NET.Managers
             bot.MessageServerChatEvent += OnMessageServerChatEvent;
             bot.MessageServerCommandEvent += OnMessageServerCommandEvent;
             bot.MessageWhisperEvent += OnMessageWhisperEvent;
-            bot.FollowEvent += OnFollowEvent;
             bot.ColorChangeEvent += OnColorChangeEvent;
             bot.ErrorEvent += OnErrorEvent;
-            bot.Connect(credentials);
+            await bot.ConnectAsync(credentials);
 
             _bots.TryAdd(botDTO.Id, bot);
 
@@ -67,7 +66,6 @@ namespace TwitchBots.NET.Managers
                 bot.MessageServerChatEvent -= OnMessageServerChatEvent;
                 bot.MessageServerCommandEvent -= OnMessageServerCommandEvent;
                 bot.MessageWhisperEvent -= OnMessageWhisperEvent;
-                bot.FollowEvent -= OnFollowEvent;
                 bot.ColorChangeEvent -= OnColorChangeEvent;
                 bot.ErrorEvent -= OnErrorEvent;
                 return true;
@@ -76,87 +74,74 @@ namespace TwitchBots.NET.Managers
             return false;
         }
 
-        private Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        private async Task OnMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
         {
-            FireMessageServerCommandEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerCommandEventAsync(sender, args);
         }
-        private Task OnMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        private async Task OnMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
         {
-            FireMessageWhisperEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageWhisperEventAsync(sender, args);
         }
-        private Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        private async Task OnMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
         {
-            FireMessageServerChatEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerChatEventAsync(sender, args);
         }
-        private Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        private async Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
         {
-            FireConnectionServerUserEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerUserEventAsync(sender, args);
         }
-        private Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        private async Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
         {
-            FireConnectionServerBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerBotEventAsync(sender, args);
         }
-        private Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        private async Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
         {
-            FireConnectionBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionBotEventAsync(sender, args);
         }
-
-        private Task OnFollowEvent(object sender, FollowEventArgs args)
+        private async Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {
-            throw new NotImplementedException();
+            await FireColorChangeEventAsync(sender, args);
         }
-        private Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        private async Task OnErrorEvent(object sender, ErrorEventArgs args)
         {
-            FireColorChangeEvent(sender, args);
-            return Task.CompletedTask;
-        }
-        private Task OnErrorEvent(object sender, ErrorEventArgs args)
-        {
-            FireErrorEvent(sender, args);
-            return Task.CompletedTask;
+            await FireErrorEventAsync(sender, args);
         }
 
-        private void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        private async Task FireConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            ConnectionBotEvent?.Invoke(sender, args);
+            await ConnectionBotEvent?.Invoke(sender, args);
         }
-        private void FireConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        private async Task FireConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            ConnectionServerBotEvent?.Invoke(sender, args);
+            await ConnectionServerBotEvent?.Invoke(sender, args);
         }
-        private void FireConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        private async Task FireConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            ConnectionServerUserEvent?.Invoke(sender, args);
+            await ConnectionServerUserEvent?.Invoke(sender, args);
         }
-        private void FireMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        private async Task FireMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            MessageServerChatEvent?.Invoke(sender, args);
+            await MessageServerChatEvent?.Invoke(sender, args);
         }
-        private void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        private async Task FireMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            MessageServerCommandEvent?.Invoke(sender, args);
+            await MessageServerCommandEvent?.Invoke(sender, args);
         }
-        private void FireMessageWhisperEvent(object sender, MessageWhisperEventArgs args)
+        private async Task FireMessageWhisperEventAsync(object sender, MessageWhisperEventArgs args)
         {
-            MessageWhisperEvent?.Invoke(sender, args);
+            await MessageWhisperEvent?.Invoke(sender, args);
         }
-        private void FireFollowEvent(object sender, FollowEventArgs args)
+        private async Task FireFollowEventAsync(object sender, FollowEventArgs args)
         {
-            FollowEvent?.Invoke(sender, args);
+            await FollowEvent?.Invoke(sender, args);
         }
-        private void FireColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        private async Task FireColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            ColorChangeEvent?.Invoke(sender, args);
+            await ColorChangeEvent?.Invoke(sender, args);
         }
-        private void FireErrorEvent(object sender, ErrorEventArgs args)
+        private async Task FireErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            ErrorEvent?.Invoke(sender, args);
+            await ErrorEvent?.Invoke(sender, args);
         }
 
         public void Dispose()

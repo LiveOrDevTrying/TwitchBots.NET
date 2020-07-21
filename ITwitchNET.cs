@@ -37,9 +37,9 @@ namespace TwitchBots.NET
 
         void SendCommandToServer(IBot bot, IServer server, string message, ChatColorPresets chatColor);
         void SendCommandToServer(IBot bot, IServer server, string message, string hexCodeColor);
-        void SendCommandToServerImmediate(IBot bot, IServer server, string message);
+        Task SendCommandToServerImmediateAsync(IBot bot, IServer server, string message);
         void SendMessageToServer(IBot bot, IServer server, string message, ChatColorPresets chatColor);
         void SendMessageToServer(IBot bot, IServer server, string message, string colorHexCode);
-        void SendMessageToServerImmediate(IBot bot, IServer server, string message);
+        Task SendMessageToServerImmediateAsync(IBot bot, IServer server, string message);
     }
 }

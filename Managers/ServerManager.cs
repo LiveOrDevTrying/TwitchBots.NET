@@ -143,79 +143,70 @@ namespace TwitchBots.NET.Managers
             }
         }
 
-        private Task OnMessageServerCommand(object sender, MessageServerCommandEventArgs args)
+        private async Task OnMessageServerCommand(object sender, MessageServerCommandEventArgs args)
         {
-            FireMessageServerCommandEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerCommandEventAsync(sender, args);
         }
-        private Task OnMessageServerChat(object sender, MessageServerChatEventArgs args)
+        private async Task OnMessageServerChat(object sender, MessageServerChatEventArgs args)
         {
-            FireMessageServerChatEvent(sender, args);
-            return Task.CompletedTask;
+            await FireMessageServerChatEventAsync(sender, args);
         }
-        private Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        private async Task OnConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
         {
-            FireConnectionServerUserEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionServerUserEventAsync(sender, args);
         }
-        private Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        private async Task OnConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
         {
-            FireConnectionServerBotEvent(sender, args);
-            return Task.CompletedTask;
-            throw new NotImplementedException();
+            await FireConnectionServerBotEventAsync(sender, args);
         }
-        private Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        private async Task OnConnectionBotEvent(object sender, ConnectionBotEventArgs args)
         {
-            FireConnectionBotEvent(sender, args);
-            return Task.CompletedTask;
+            await FireConnectionBotEventAsync(sender, args);
         }
-        private Task OnFollowEvent(object sender, FollowEventArgs args)
+        private async Task OnFollowEvent(object sender, FollowEventArgs args)
         {
-            FireFollowEvent(sender, args);
-            return Task.CompletedTask;
+            await FireFollowEventAsync(sender, args);
         }
-        private Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        private async Task OnColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
         {
-            FireServerChatColorChangeEvent(sender, args);
-            return Task.CompletedTask;
+            await FireServerChatColorChangeEventAsync(sender, args);
         }
-        private Task OnErrorEvent(object sender, ErrorEventArgs args)
+        private async Task OnErrorEvent(object sender, ErrorEventArgs args)
         {
-            FireErrorEvent(sender, args);
-            return Task.CompletedTask;
+            await FireErrorEventAsync(sender, args);
         }
 
-        private void FireConnectionBotEvent(object sender, ConnectionBotEventArgs args)
+        private async Task FireConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            ConnectionBotEvent?.Invoke(sender, args);
+            await ConnectionBotEvent?.Invoke(sender, args);
         }
-        private void FireConnectionServerBotEvent(object sender, ConnectionServerBotEventArgs args)
+        private async Task FireConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            ConnectionServerBotEvent?.Invoke(sender, args);
+            await ConnectionServerBotEvent?.Invoke(sender, args);
         }
-        private void FireConnectionServerUserEvent(object sender, ConnectionServerUserEventArgs args)
+        private async Task FireConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            ConnectionServerUserEvent?.Invoke(sender, args);
+            await ConnectionServerUserEvent?.Invoke(sender, args);
         }
-        private void FireMessageServerChatEvent(object sender, MessageServerChatEventArgs args)
+        private async Task FireMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            MessageServerChatEvent?.Invoke(sender, args);
+            await MessageServerChatEvent?.Invoke(sender, args);
         }
-        private void FireMessageServerCommandEvent(object sender, MessageServerCommandEventArgs args)
+        private async Task FireMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            MessageServerCommandEvent?.Invoke(sender, args);
+            await MessageServerCommandEvent?.Invoke(sender, args);
         }
-        private void FireFollowEvent(object sender, FollowEventArgs args)
+        private async Task FireFollowEventAsync(object sender, FollowEventArgs args)
         {
-            FollowEvent?.Invoke(sender, args);
+            await FollowEvent?.Invoke(sender, args);
         }
-        private void FireServerChatColorChangeEvent(object sender, ServerChatColorChangeEventArgs args)
+        private async Task FireServerChatColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            ColorChangeEvent?.Invoke(sender, args);
+            await ColorChangeEvent?.Invoke(sender, args);
         }
-        private void FireErrorEvent(object sender, ErrorEventArgs args)
+        private async Task FireErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            ErrorEvent?.Invoke(sender, args);
+            await ErrorEvent?.Invoke(sender, args);
         }
 
         public void Dispose()

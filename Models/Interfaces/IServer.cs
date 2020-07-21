@@ -28,10 +28,10 @@ namespace TwitchBots.NET.Models.Interfaces
         void OnTimerTick();
 
         void SendCommand(IMessageServerCommand command);
-        void SendCommandImmediate(string command);
+        Task SendCommandImmediateAsync(string command);
         void SendMessage(IMessageServerChat message);
-        void SendMessageImmediate(string message);
-        void FollowReceived(IUserDTO[] users);
+        Task SendMessageImmediateAsync(string message);
+        Task FollowReceived(IUserDTO[] users);
 
         IServerDTO ServerDTO { get; }
         IBot Bot { get; }
