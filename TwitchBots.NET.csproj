@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/liveordevtrying/twitchbots.net</RepositoryUrl>
     <RepositoryType>GitHub Public</RepositoryType>
     <PackageTags>Twitch twitchbots.net twitchbots twitchlib library multiple irc chat bots c# csharp channels api events tcp net core 2.1 2.0 async await</PackageTags>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <PackageIconUrl>https://pixelhorrorstudios.s3-us-west-2.amazonaws.com/Packages/TwitchBotsNET.png</PackageIconUrl>
   </PropertyGroup>
 

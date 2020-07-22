@@ -109,39 +109,66 @@ namespace TwitchBots.NET.Managers
 
         private async Task FireConnectionBotEventAsync(object sender, ConnectionBotEventArgs args)
         {
-            await ConnectionBotEvent?.Invoke(sender, args);
+            if (ConnectionBotEvent != null)
+            {
+                await ConnectionBotEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireConnectionServerBotEventAsync(object sender, ConnectionServerBotEventArgs args)
         {
-            await ConnectionServerBotEvent?.Invoke(sender, args);
+            if (ConnectionServerBotEvent != null)
+            {
+                await ConnectionServerBotEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireConnectionServerUserEventAsync(object sender, ConnectionServerUserEventArgs args)
         {
-            await ConnectionServerUserEvent?.Invoke(sender, args);
+            if (ConnectionServerUserEvent != null)
+            {
+                await ConnectionServerUserEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireMessageServerChatEventAsync(object sender, MessageServerChatEventArgs args)
         {
-            await MessageServerChatEvent?.Invoke(sender, args);
+            if (MessageServerChatEvent != null)
+            {
+                await MessageServerChatEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireMessageServerCommandEventAsync(object sender, MessageServerCommandEventArgs args)
         {
-            await MessageServerCommandEvent?.Invoke(sender, args);
+            if (MessageServerCommandEvent != null)
+            {
+                await MessageServerCommandEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireMessageWhisperEventAsync(object sender, MessageWhisperEventArgs args)
         {
-            await MessageWhisperEvent?.Invoke(sender, args);
+            if (MessageWhisperEvent != null)
+            {
+                await MessageWhisperEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireFollowEventAsync(object sender, FollowEventArgs args)
         {
-            await FollowEvent?.Invoke(sender, args);
+            if (FollowEvent != null)
+            {
+                await FollowEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireColorChangeEventAsync(object sender, ServerChatColorChangeEventArgs args)
         {
-            await ColorChangeEvent?.Invoke(sender, args);
+            if (ColorChangeEvent != null)
+            {
+                await ColorChangeEvent?.Invoke(sender, args);
+            }
         }
         private async Task FireErrorEventAsync(object sender, ErrorEventArgs args)
         {
-            await ErrorEvent?.Invoke(sender, args);
+            if (ErrorEvent != null)
+            {
+                await ErrorEvent?.Invoke(sender, args);
+            }
         }
 
         public void Dispose()

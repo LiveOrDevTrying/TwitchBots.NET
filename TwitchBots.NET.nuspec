@@ -16,7 +16,7 @@
     <tags>Twitch twitchbots.net twitchbots twitchlib library multiple irc chat bots c# csharp channels api events tcp net core 2.1 2.0 async await</tags>
     <dependencies>
       <group targetFramework="net21">
-        <dependency id="TwitchLib" version="3.0.1" />
+        <dependency id="TwitchLib" version="3.1.1" />
       </group>
     </dependencies>
   </metadata>
