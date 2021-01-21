@@ -1,27 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>2.1.0</Version>
     <Authors>Rob Engel - LiveOrDevTrying</Authors>
-    <Company>Pixel Horror Studios</Company>
-    <Description>An async / await wrapper of TwitchLib that supports multiple bots in multiple channels with an interface allowing you to create your own data-access-layer or use the provided in-memory service.</Description>
-    <Copyright>Copyright 2019</Copyright>
+    <Company>Rob Engel - LiveOrDevTrying - Pixel Horror Studios</Company>
+    <Description>An async / await wrapper of TwitchLib that supports multiple bots in multiple channels with an interface allowing you to create your own data-access-layer or in-memory service.</Description>
+    <Copyright>Copyright 2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/liveordevtrying/twitchbots.net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/liveordevtrying/twitchbots.net</RepositoryUrl>
-    <RepositoryType>GitHub Public</RepositoryType>
+    <RepositoryType>Github Public</RepositoryType>
+    <PackageIcon>Logo.png</PackageIcon>
     <PackageTags>Twitch twitchbots.net twitchbots twitchlib library multiple irc chat bots c# csharp channels api events tcp net core 2.1 2.0 async await</PackageTags>
-    <Version>1.1.1</Version>
-    <PackageIconUrl>https://pixelhorrorstudios.s3-us-west-2.amazonaws.com/Packages/TwitchBotsNET.png</PackageIconUrl>
+    <ApplicationIcon>Logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\**" />
-    <EmbeddedResource Remove="Services\**" />
-    <None Remove="Services\**" />
+    <PackageReference Include="TwitchLib" Version="3.*" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="TwitchLib" Version="3.1.1" />
+    <None Include="Logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
