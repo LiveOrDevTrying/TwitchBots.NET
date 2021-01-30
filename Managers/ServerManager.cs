@@ -54,11 +54,11 @@ namespace TwitchBots.NET.Managers
 
         public async Task<IServer> JoinServerAsync(string serverName)
         { 
-            var server = await _twitchNetService.GetServerByUsernameAsync(serverName);
+            var serverDTO = await _twitchNetService.GetServerByUsernameAsync(serverName);
 
             if (!_servers.Any(s => s.ServerDTO.Username.Trim().ToLower() == serverName.Trim().ToLower()))
             {
-                var instance = new Server(_twitchNetService, _client, _bot, server, _twitchAPI, _maxNumberMessagesInQueue);
+                var instance = new Server(_twitchNetService, _client, _bot, serverDTO, _twitchAPI, _maxNumberMessagesInQueue);
                 instance.ConnectionBotEvent += OnConnectionBotEvent;
                 instance.ConnectionServerBotEvent += OnConnectionServerBotEvent;
                 instance.ConnectionServerUserEvent += OnConnectionServerUserEvent;
@@ -72,7 +72,14 @@ namespace TwitchBots.NET.Managers
             }
             else
             {
-                return _servers.FirstOrDefault(s => s.ServerDTO.Username.Trim().ToLower() == serverName.Trim().ToLower());
+                var server = _servers.FirstOrDefault(s => s.ServerDTO.Username.Trim().ToLower() == serverName.Trim().ToLower());
+
+                if (!server.IsConnected)
+                {
+                    server.RejoinChannel();
+                }
+
+                return server;
             }
         }
         public bool LeaveServer(IServer server)
@@ -261,23 +268,7 @@ namespace TwitchBots.NET.Managers
         {
             get
             {
-                var queue = new Queue<IServer>();
-
-                foreach (var server in _servers.ToList())
-                {
-                    if (server.Client.IsConnected &&
-                        server.Client.JoinedChannels.Any(s => s.Channel.Trim().ToLower() == server.ServerDTO.Username.Trim().ToLower()))
-                    {
-                        queue.Enqueue(server);
-                    }
-                    else
-                    {
-                        LeaveServer(server);
-                    }
-                }
-
-                _servers = new ConcurrentQueue<IServer>(queue);
-                return _servers.ToList();
+                return _servers.Where(x => x.Client.IsConnected && x.Client.JoinedChannels.Any(s => s.Channel.Trim().ToLower() == x.ServerDTO.Username.Trim().ToLower())).ToList();
             }
         }
     }

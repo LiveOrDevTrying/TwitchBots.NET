@@ -32,6 +32,7 @@ namespace TwitchBots.NET.Models.Interfaces
         void SendMessage(IMessageServerChat message);
         Task SendMessageImmediateAsync(string message);
         Task FollowReceived(IUserDTO[] users);
+        void RejoinChannel();
 
         IServerDTO ServerDTO { get; }
         IBot Bot { get; }
@@ -39,5 +40,6 @@ namespace TwitchBots.NET.Models.Interfaces
         string CurrentBotChatColorHex { get; }
         int NumberMessagesQueued { get; }
         TwitchClient Client { get; }
+        bool IsConnected { get; }
     }
 }

@@ -77,6 +77,14 @@ namespace TwitchBots.NET.Models
                 _client.JoinChannel(_serverDTO.Username.Trim().ToLower());
             }
         }
+        public virtual void RejoinChannel()
+        {
+            if (_client.IsConnected &&
+              !_client.JoinedChannels.Any(s => s.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower()))
+            {
+                _client.JoinChannel(_serverDTO.Username.Trim().ToLower());
+            }
+        }
 
         public virtual void SendMessage(IMessageServerChat message)
         {
@@ -723,6 +731,13 @@ namespace TwitchBots.NET.Models
             get
             {
                 return _client;
+            }
+        }
+        public bool IsConnected
+        {
+            get
+            {
+                return _client != null && _client.IsConnected && _client.JoinedChannels.Any(x => x.Channel.Trim().ToLower() == _serverDTO.Username.Trim().ToLower());
             }
         }
     }
